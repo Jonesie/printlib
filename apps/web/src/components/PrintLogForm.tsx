@@ -1,12 +1,46 @@
 import { useState } from "react";
+import type { PrintLog } from "@printlib/shared";
 import { api } from "../api/client";
 
-export default function PrintLogForm({ modelId, onAdded }: { modelId: number; onAdded: () => void }) {
-  const [open, setOpen] = useState(false);
-  const [success, setSuccess] = useState(true);
-  const [notes, setNotes] = useState("");
-  const [printerName, setPrinterName] = useState("");
-  const [material, setMaterial] = useState("");
+// Local calendar date, not toISOString()'s UTC date — otherwise this shows
+// the wrong day whenever local time and UTC fall on different calendar
+// dates (i.e. most of the time outside UTC+0).
+function toLocalDateInput(d: Date): string {
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}`;
+}
+
+function today(): string {
+  return toLocalDateInput(new Date());
+}
+
+// Combines the chosen calendar date (in the browser's own timezone) with
+// the current time-of-day into a full instant, computed client-side so the
+// server never has to guess which timezone the date string was meant in.
+function dateInputToIso(dateStr: string): string {
+  const [y, m, d] = dateStr.split("-").map(Number);
+  const now = new Date();
+  return new Date(y, m - 1, d, now.getHours(), now.getMinutes(), now.getSeconds(), now.getMilliseconds()).toISOString();
+}
+
+function PrintLogFields({
+  modelId,
+  log,
+  onDone,
+  onCancel,
+}: {
+  modelId: number;
+  log?: PrintLog;
+  onDone: () => void;
+  onCancel: () => void;
+}) {
+  const [success, setSuccess] = useState(log?.success ?? true);
+  const [date, setDate] = useState(log ? toLocalDateInput(new Date(log.createdAt)) : today());
+  const [notes, setNotes] = useState(log?.notes ?? "");
+  const [printerName, setPrinterName] = useState(log?.printerName ?? "");
+  const [material, setMaterial] = useState(log?.material ?? "");
   const [photo, setPhoto] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -15,32 +49,21 @@ export default function PrintLogForm({ modelId, onAdded }: { modelId: number; on
     try {
       const form = new FormData();
       form.set("success", String(success));
+      form.set("date", dateInputToIso(date));
       if (notes.trim()) form.set("notes", notes.trim());
       if (printerName.trim()) form.set("printerName", printerName.trim());
       if (material.trim()) form.set("material", material.trim());
       if (photo) form.set("photo", photo);
 
-      await api.addPrintLog(modelId, form);
-      setOpen(false);
-      setNotes("");
-      setPrinterName("");
-      setMaterial("");
-      setPhoto(null);
-      onAdded();
+      if (log) {
+        await api.updatePrintLog(log.id, form);
+      } else {
+        await api.addPrintLog(modelId, form);
+      }
+      onDone();
     } finally {
       setSubmitting(false);
     }
-  }
-
-  if (!open) {
-    return (
-      <button
-        onClick={() => setOpen(true)}
-        className="rounded-md border border-slate-700 px-3 py-1.5 text-sm hover:bg-slate-800"
-      >
-        + Log a print
-      </button>
-    );
   }
 
   return (
@@ -54,6 +77,12 @@ export default function PrintLogForm({ modelId, onAdded }: { modelId: number; on
             <input type="radio" checked={!success} onChange={() => setSuccess(false)} /> Failed
           </label>
         </div>
+        <input
+          type="date"
+          className="rounded bg-slate-800 px-3 py-2"
+          value={date}
+          onChange={(e) => setDate(e.target.value)}
+        />
         <textarea
           className="rounded bg-slate-800 px-3 py-2"
           placeholder="Notes (settings, what happened, adjustments...)"
@@ -75,6 +104,9 @@ export default function PrintLogForm({ modelId, onAdded }: { modelId: number; on
           />
         </div>
         <input type="file" accept="image/*" onChange={(e) => setPhoto(e.target.files?.[0] ?? null)} />
+        {log?.photoFilename && !photo && (
+          <p className="text-xs text-slate-500">Leave blank to keep the existing photo.</p>
+        )}
         <div className="flex gap-2">
           <button
             onClick={submit}
@@ -83,11 +115,51 @@ export default function PrintLogForm({ modelId, onAdded }: { modelId: number; on
           >
             {submitting ? "Saving…" : "Save"}
           </button>
-          <button onClick={() => setOpen(false)} className="text-slate-400 hover:text-slate-200">
+          <button onClick={onCancel} className="text-slate-400 hover:text-slate-200">
             Cancel
           </button>
         </div>
       </div>
     </div>
   );
+}
+
+export default function PrintLogForm({ modelId, onAdded }: { modelId: number; onAdded: () => void }) {
+  const [open, setOpen] = useState(false);
+
+  if (!open) {
+    return (
+      <button
+        onClick={() => setOpen(true)}
+        className="rounded-md border border-slate-700 px-3 py-1.5 text-sm hover:bg-slate-800"
+      >
+        + Log a print
+      </button>
+    );
+  }
+
+  return (
+    <PrintLogFields
+      modelId={modelId}
+      onDone={() => {
+        setOpen(false);
+        onAdded();
+      }}
+      onCancel={() => setOpen(false)}
+    />
+  );
+}
+
+export function EditPrintLogForm({
+  modelId,
+  log,
+  onSaved,
+  onCancel,
+}: {
+  modelId: number;
+  log: PrintLog;
+  onSaved: () => void;
+  onCancel: () => void;
+}) {
+  return <PrintLogFields modelId={modelId} log={log} onDone={onSaved} onCancel={onCancel} />;
 }

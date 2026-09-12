@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import type { FastifyInstance } from "fastify";
 import { getModelFile } from "../db/queries.js";
-import { PRINT_LOGS_DIR } from "../config.js";
+import { PREVIEWS_DIR, PRINT_LOGS_DIR } from "../config.js";
 
 export default async function filesRoutes(app: FastifyInstance) {
   app.get("/api/files/:id/download", async (request, reply) => {
@@ -19,6 +19,14 @@ export default async function filesRoutes(app: FastifyInstance) {
     const { filename } = request.params as { filename: string };
     const safe = path.basename(filename);
     const filePath = path.join(PRINT_LOGS_DIR, safe);
+    if (!fs.existsSync(filePath)) return reply.code(404).send({ error: "Not found" });
+    return reply.send(fs.createReadStream(filePath));
+  });
+
+  app.get("/api/previews/:filename", async (request, reply) => {
+    const { filename } = request.params as { filename: string };
+    const safe = path.basename(filename);
+    const filePath = path.join(PREVIEWS_DIR, safe);
     if (!fs.existsSync(filePath)) return reply.code(404).send({ error: "Not found" });
     return reply.send(fs.createReadStream(filePath));
   });

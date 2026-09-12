@@ -51,6 +51,20 @@ export const api = {
     }).then((r) => json<Category>(r));
   },
 
+  updateCategory(id: number, name: string) {
+    return fetch(`/api/categories/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name }),
+    }).then((r) => json<Category>(r));
+  },
+
+  deleteCategory(id: number) {
+    return fetch(`/api/categories/${id}`, { method: "DELETE" }).then((r) => {
+      if (!r.ok) throw new Error("Failed to delete category");
+    });
+  },
+
   listTags() {
     return fetch(`/api/tags`).then((r) => json<Tag[]>(r));
   },
@@ -61,11 +75,31 @@ export const api = {
     );
   },
 
+  updatePrintLog(id: number, form: FormData) {
+    return fetch(`/api/print-logs/${id}`, { method: "PATCH", body: form }).then((r) => json<ModelDetail>(r));
+  },
+
+  deletePrintLog(id: number) {
+    return fetch(`/api/print-logs/${id}`, { method: "DELETE" }).then((r) => json<ModelDetail>(r));
+  },
+
+  savePreview(modelId: number, blob: Blob) {
+    const form = new FormData();
+    form.set("preview", blob, "preview.png");
+    return fetch(`/api/models/${modelId}/preview`, { method: "POST", body: form }).then((r) =>
+      json<ModelDetail>(r),
+    );
+  },
+
   fileDownloadUrl(fileId: number) {
     return `/api/files/${fileId}/download`;
   },
 
   printLogPhotoUrl(filename: string) {
     return `/api/print-log-photos/${filename}`;
+  },
+
+  previewUrl(filename: string) {
+    return `/api/previews/${filename}`;
   },
 };

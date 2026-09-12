@@ -1,16 +1,18 @@
 import fs from "node:fs";
 import path from "node:path";
+import crypto from "node:crypto";
 import type { FastifyInstance } from "fastify";
 import {
   createModel,
   deleteModel,
   getModelDetail,
   listModels,
+  setModelPreview,
   setModelTags,
   updateModel,
 } from "../db/queries.js";
 import { storeUpload } from "../lib/upload.js";
-import { MODELS_DIR } from "../config.js";
+import { MODELS_DIR, PREVIEWS_DIR } from "../config.js";
 
 async function readMultipartBuffer(part: AsyncIterable<Buffer>): Promise<Buffer> {
   const chunks: Buffer[] = [];
@@ -82,6 +84,27 @@ export default async function modelsRoutes(app: FastifyInstance) {
 
     updateModel(id, { name: body.name, description: body.description, categoryId: body.categoryId });
     if (body.tags) setModelTags(id, body.tags);
+    return getModelDetail(id);
+  });
+
+  // multipart/form-data: preview (a single image, typically a canvas snapshot)
+  app.post("/api/models/:id/preview", async (request, reply) => {
+    const id = Number((request.params as { id: string }).id);
+    if (!getModelDetail(id)) return reply.code(404).send({ error: "Model not found" });
+
+    const parts = request.parts();
+    let filename: string | null = null;
+    for await (const part of parts) {
+      if (part.type === "file" && part.fieldname === "preview") {
+        const ext = (part.filename?.split(".").pop() || "png").toLowerCase();
+        const storedName = `${id}-${crypto.randomUUID()}.${ext}`;
+        fs.writeFileSync(path.join(PREVIEWS_DIR, storedName), await readMultipartBuffer(part.file));
+        filename = storedName;
+      }
+    }
+    if (!filename) return reply.code(400).send({ error: "preview file is required" });
+
+    setModelPreview(id, filename);
     return getModelDetail(id);
   });
 

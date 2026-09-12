@@ -1,10 +1,11 @@
 import fs from "node:fs";
 import Database from "better-sqlite3";
-import { DATA_DIR, DB_PATH, MODELS_DIR, PRINT_LOGS_DIR } from "../config.js";
+import { DATA_DIR, DB_PATH, MODELS_DIR, PREVIEWS_DIR, PRINT_LOGS_DIR } from "../config.js";
 
 fs.mkdirSync(DATA_DIR, { recursive: true });
 fs.mkdirSync(MODELS_DIR, { recursive: true });
 fs.mkdirSync(PRINT_LOGS_DIR, { recursive: true });
+fs.mkdirSync(PREVIEWS_DIR, { recursive: true });
 
 export const db = new Database(DB_PATH);
 db.pragma("journal_mode = WAL");
@@ -60,3 +61,10 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_print_logs_model_id ON print_logs(model_id);
   CREATE INDEX IF NOT EXISTS idx_models_category_id ON models(category_id);
 `);
+
+// Simple additive migration: add columns introduced after the initial
+// CREATE TABLE if they're missing from an existing database file.
+const modelColumns = db.prepare(`PRAGMA table_info(models)`).all() as { name: string }[];
+if (!modelColumns.some((c) => c.name === "preview_filename")) {
+  db.exec(`ALTER TABLE models ADD COLUMN preview_filename TEXT`);
+}

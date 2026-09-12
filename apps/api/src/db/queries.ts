@@ -56,12 +56,13 @@ function toSummary(row: any): ModelSummary {
     primaryFileType: row.primary_file_type ?? null,
     printCount: row.print_count,
     lastPrintedAt: row.last_printed_at,
+    previewFilename: row.preview_filename ?? null,
   };
 }
 
 const summaryBaseQuery = `
   SELECT
-    m.id, m.name, m.description, m.created_at, m.category_id,
+    m.id, m.name, m.description, m.created_at, m.category_id, m.preview_filename,
     c.name AS category_name,
     (SELECT COUNT(*) FROM model_files mf WHERE mf.model_id = m.id) AS file_count,
     (SELECT mf.file_type FROM model_files mf WHERE mf.model_id = m.id
@@ -142,6 +143,10 @@ export function deleteModel(id: number): void {
   db.prepare(`DELETE FROM models WHERE id = ?`).run(id);
 }
 
+export function setModelPreview(id: number, filename: string): void {
+  db.prepare(`UPDATE models SET preview_filename = ? WHERE id = ?`).run(filename, id);
+}
+
 export function addModelFile(input: {
   modelId: number;
   filename: string;
@@ -175,6 +180,15 @@ export function createCategory(name: string): Category {
   return { id, name };
 }
 
+export function updateCategory(id: number, name: string): Category {
+  db.prepare(`UPDATE categories SET name = ? WHERE id = ?`).run(name, id);
+  return { id, name };
+}
+
+export function deleteCategory(id: number): void {
+  db.prepare(`DELETE FROM categories WHERE id = ?`).run(id);
+}
+
 export function listTags(): Tag[] {
   return db.prepare(`SELECT * FROM tags ORDER BY name`).all().map(rowToTag);
 }
@@ -201,7 +215,25 @@ export function addPrintLog(input: {
   photoFilename?: string | null;
   printerName?: string | null;
   material?: string | null;
+  createdAt?: string | null;
 }): number {
+  if (input.createdAt) {
+    const result = db
+      .prepare(
+        `INSERT INTO print_logs (model_id, success, notes, photo_filename, printer_name, material, created_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      )
+      .run(
+        input.modelId,
+        input.success ? 1 : 0,
+        input.notes ?? null,
+        input.photoFilename ?? null,
+        input.printerName ?? null,
+        input.material ?? null,
+        input.createdAt,
+      );
+    return Number(result.lastInsertRowid);
+  }
   const result = db
     .prepare(
       `INSERT INTO print_logs (model_id, success, notes, photo_filename, printer_name, material)
@@ -216,4 +248,41 @@ export function addPrintLog(input: {
       input.material ?? null,
     );
   return Number(result.lastInsertRowid);
+}
+
+export function getPrintLog(id: number): PrintLog | null {
+  const row = db.prepare(`SELECT * FROM print_logs WHERE id = ?`).get(id) as any;
+  if (!row) return null;
+  return rowToPrintLog(row);
+}
+
+export function updatePrintLog(
+  id: number,
+  input: {
+    success?: boolean;
+    notes?: string | null;
+    photoFilename?: string | null;
+    printerName?: string | null;
+    material?: string | null;
+    createdAt?: string;
+  },
+): void {
+  const current = db.prepare(`SELECT * FROM print_logs WHERE id = ?`).get(id) as any;
+  if (!current) throw new Error("Print log not found");
+  db.prepare(
+    `UPDATE print_logs SET success = ?, notes = ?, photo_filename = ?, printer_name = ?, material = ?, created_at = ?
+     WHERE id = ?`,
+  ).run(
+    input.success !== undefined ? (input.success ? 1 : 0) : current.success,
+    input.notes !== undefined ? input.notes : current.notes,
+    input.photoFilename !== undefined ? input.photoFilename : current.photo_filename,
+    input.printerName !== undefined ? input.printerName : current.printer_name,
+    input.material !== undefined ? input.material : current.material,
+    input.createdAt ?? current.created_at,
+    id,
+  );
+}
+
+export function deletePrintLog(id: number): void {
+  db.prepare(`DELETE FROM print_logs WHERE id = ?`).run(id);
 }

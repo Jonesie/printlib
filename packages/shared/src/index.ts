@@ -66,6 +66,7 @@ export const modelSummarySchema = z.object({
   primaryFileType: z.enum(FILE_TYPES).nullable(),
   printCount: z.number(),
   lastPrintedAt: z.string().nullable(),
+  previewFilename: z.string().nullable(),
 });
 export type ModelSummary = z.infer<typeof modelSummarySchema>;
 

@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import type { Category, ModelSummary } from "@printlib/shared";
 import { api } from "../api/client";
 import UploadDropzone from "../components/UploadDropzone";
+import CategoryManager from "../components/CategoryManager";
 
 export default function Library() {
   const [models, setModels] = useState<ModelSummary[]>([]);
@@ -53,6 +54,8 @@ export default function Library() {
         <UploadDropzone categories={categories} onUploaded={refresh} />
       </div>
 
+      <CategoryManager categories={categories} onChanged={refresh} />
+
       {loading ? (
         <p className="text-slate-400">Loading…</p>
       ) : models.length === 0 ? (
@@ -65,9 +68,17 @@ export default function Library() {
               to={`/models/${model.id}`}
               className="rounded-lg border border-slate-800 bg-slate-900 p-4 hover:border-sky-600"
             >
-              <div className="mb-2 flex items-center justify-center rounded bg-slate-800 py-8 text-3xl">
-                🧊
-              </div>
+              {model.previewFilename ? (
+                <img
+                  src={api.previewUrl(model.previewFilename)}
+                  alt={model.name}
+                  className="mb-2 h-28 w-full rounded object-cover"
+                />
+              ) : (
+                <div className="mb-2 flex items-center justify-center rounded bg-slate-800 py-8 text-3xl">
+                  🧊
+                </div>
+              )}
               <h3 className="truncate font-medium">{model.name}</h3>
               <p className="truncate text-sm text-slate-400">
                 {model.category?.name ?? "Uncategorized"} · {model.fileCount} file
