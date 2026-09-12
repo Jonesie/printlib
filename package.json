@@ -5,5 +5,10 @@
   "workspaces": [
     "apps/*",
     "packages/*"
-  ]
+  ],
+  "scripts": {
+    "dev:api": "npm run dev -w @printlib/api",
+    "dev:web": "npm run dev -w @printlib/web",
+    "build": "npm run build -w @printlib/shared && npm run build -w @printlib/web && npm run build -w @printlib/api"
+  }
 }
