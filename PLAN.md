@@ -4,6 +4,15 @@ A personal, self-hosted library for 3D printer model files: search, browse, cate
 group multi-file models, keep print notes/photos, and (eventually) send jobs straight
 to a printer.
 
+## Status (2026-09-12)
+
+Phase 1 MVP is implemented and running: upload (single file or zip, auto-grouped),
+library search/filter, categories + tags, an in-browser STL viewer, and print logs
+with notes + a photo. Deployed as the `printlib` container in `~/dev/home_nginx`,
+reachable at `http://printlib.jonesie.home` (LAN-only, added to `/etc/hosts`).
+Not yet done from Phase 1: FTS5-based search (currently simple `LIKE` matching,
+fine at personal-library scale) and 3MF/OBJ preview (STL only for now).
+
 ## Goals
 
 - Upload models as a single file (`.stl`, `.3mf`, `.obj`, `.gcode`, ...) or as a `.zip`
