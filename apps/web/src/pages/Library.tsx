@@ -78,10 +78,10 @@ export default function Library() {
                 <img
                   src={api.previewUrl(model.previewFilename)}
                   alt={model.name}
-                  className="mb-2 h-28 w-full rounded object-cover"
+                  className="mb-2 aspect-square w-full rounded bg-slate-800 object-contain"
                 />
               ) : (
-                <div className="mb-2 flex items-center justify-center rounded bg-slate-800 py-8 text-3xl">
+                <div className="mb-2 flex aspect-square w-full items-center justify-center rounded bg-slate-800 text-3xl">
                   🧊
                 </div>
               )}
