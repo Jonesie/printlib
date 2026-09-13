@@ -7,10 +7,12 @@ to a printer.
 ## Status
 
 Phase 1 MVP is implemented and running: upload (single file or zip, auto-grouped),
-library search/filter, categories + tags, an in-browser STL viewer, print logs
-with notes + a photo, whole-app auth with public read-only browsing, star ratings,
-and a home-page panel of popular model sites. Deployed behind a reverse proxy with
-its own domain and TLS cert; see [README.md](./README.md) for self-hosting.
+library search/filter/sort, categories + tags, an in-browser STL viewer, print logs
+with notes + a photo, public read-only browsing with login gating writes, star
+ratings, color themes, a printers section, a profile panel, and a home-page panel
+of popular model sites. Deployed behind a reverse proxy with its own domain and
+TLS cert, login restricted to the LAN at the proxy level; see
+[README.md](./README.md) for self-hosting.
 Not yet done from Phase 1: FTS5-based search (currently simple `LIKE` matching,
 fine at personal-library scale) and 3MF/OBJ preview (STL only for now).
 
