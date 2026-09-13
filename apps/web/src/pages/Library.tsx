@@ -15,6 +15,8 @@ export default function Library() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [search, setSearch] = useState("");
   const [categoryId, setCategoryId] = useState<string>("");
+  const [sortBy, setSortBy] = useState<"date-desc" | "date-asc" | "name">("date-desc");
+  const [minRating, setMinRating] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
 
@@ -33,6 +35,15 @@ export default function Library() {
     refresh();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search, categoryId]);
+
+  const visibleModels = models
+    .filter((m) => !minRating || (m.rating ?? 0) >= Number(minRating))
+    .slice()
+    .sort((a, b) => {
+      if (sortBy === "name") return a.name.localeCompare(b.name);
+      if (sortBy === "date-asc") return a.createdAt.localeCompare(b.createdAt);
+      return b.createdAt.localeCompare(a.createdAt);
+    });
 
   return (
     <div className="grid gap-6">
@@ -58,6 +69,27 @@ export default function Library() {
               </option>
             ))}
           </select>
+          <select
+            className="rounded bg-slate-800 px-3 py-2"
+            value={minRating}
+            onChange={(e) => setMinRating(e.target.value)}
+          >
+            <option value="">Any rating</option>
+            <option value="1">★ 1+</option>
+            <option value="2">★★ 2+</option>
+            <option value="3">★★★ 3+</option>
+            <option value="4">★★★★ 4+</option>
+            <option value="5">★★★★★ 5</option>
+          </select>
+          <select
+            className="rounded bg-slate-800 px-3 py-2"
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
+          >
+            <option value="date-desc">Newest first</option>
+            <option value="date-asc">Oldest first</option>
+            <option value="name">Name (A–Z)</option>
+          </select>
         </div>
         {authenticated && <UploadDropzone categories={categories} onUploaded={refresh} />}
       </div>
@@ -68,9 +100,11 @@ export default function Library() {
         <p className="text-slate-400">Loading…</p>
       ) : models.length === 0 ? (
         <p className="text-slate-400">No models yet. Add your first one above.</p>
+      ) : visibleModels.length === 0 ? (
+        <p className="text-slate-400">No models match your filters.</p>
       ) : (
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-          {models.map((model) => (
+          {visibleModels.map((model) => (
             <Link
               key={model.id}
               to={`/models/${model.id}`}

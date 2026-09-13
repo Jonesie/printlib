@@ -168,8 +168,10 @@ export default function ModelDetail() {
           )}
 
           {authenticated ? (
-            <div>
-              <h2 className="mb-1 font-medium text-slate-200">Files</h2>
+            <details open={model.files.length <= 5}>
+              <summary className="mb-1 cursor-pointer font-medium text-slate-200">
+                Files ({model.files.length})
+              </summary>
               <ul className="grid gap-1">
                 {model.files.map((file) => (
                   <li key={file.id} className="flex items-center justify-between rounded bg-slate-900 px-3 py-2 text-sm">
@@ -182,7 +184,7 @@ export default function ModelDetail() {
                   </li>
                 ))}
               </ul>
-            </div>
+            </details>
           ) : (
             model.sourceUrl && (
               <div>
