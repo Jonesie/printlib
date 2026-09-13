@@ -5,6 +5,7 @@ import { api } from "../api/client";
 import Viewer3D from "../components/Viewer3D";
 import TagEditor from "../components/TagEditor";
 import PrintLogForm, { EditPrintLogForm } from "../components/PrintLogForm";
+import StarRating from "../components/StarRating";
 import { useAuth } from "../auth/AuthContext";
 
 export default function ModelDetail() {
@@ -103,6 +104,14 @@ export default function ModelDetail() {
                 </button>
               </div>
 
+              <StarRating
+                rating={model.rating}
+                onChange={async (rating) => {
+                  await api.updateModel(model.id, { rating });
+                  refresh();
+                }}
+              />
+
               <textarea
                 className="rounded bg-slate-800 px-3 py-2"
                 placeholder="Description"
@@ -149,6 +158,7 @@ export default function ModelDetail() {
           ) : (
             <>
               <h1 className="text-xl font-semibold">{model.name}</h1>
+              <StarRating rating={model.rating} />
               {model.description && <p className="text-slate-300">{model.description}</p>}
               <p className="text-sm text-slate-400">Category: {model.category?.name ?? "Uncategorized"}</p>
               <TagEditor tags={model.tags} onChange={() => {}} readOnly />
@@ -216,11 +226,19 @@ export default function ModelDetail() {
                 ) : (
                   <li key={log.id} className="flex gap-4 rounded-lg border border-slate-800 bg-slate-900 p-4">
                     {log.photoFilename && (
-                      <img
-                        src={api.printLogPhotoUrl(log.photoFilename)}
-                        alt="Print result"
-                        className="h-24 w-24 rounded object-cover"
-                      />
+                      <div className="grid gap-1">
+                        <img
+                          src={api.printLogPhotoUrl(log.photoFilename)}
+                          alt="Print result"
+                          className="h-24 w-24 rounded object-cover"
+                        />
+                        <button
+                          onClick={() => api.setPreviewFromLog(model.id, log.id).then(refresh)}
+                          className="text-xs text-sky-400 hover:text-sky-300"
+                        >
+                          Use as preview
+                        </button>
+                      </div>
                     )}
                     <div className="flex-1">
                       <p className={log.success ? "text-emerald-400" : "text-red-400"}>

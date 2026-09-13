@@ -34,6 +34,13 @@ export const tagSchema = z.object({
 });
 export type Tag = z.infer<typeof tagSchema>;
 
+export const siteLinkSchema = z.object({
+  id: z.number(),
+  name: z.string(),
+  url: z.string(),
+});
+export type SiteLink = z.infer<typeof siteLinkSchema>;
+
 export const modelFileSchema = z.object({
   id: z.number(),
   modelId: z.number(),
@@ -68,6 +75,7 @@ export const modelSummarySchema = z.object({
   lastPrintedAt: z.string().nullable(),
   previewFilename: z.string().nullable(),
   sourceUrl: z.string().nullable(),
+  rating: z.number().min(1).max(5).nullable(),
 });
 export type ModelSummary = z.infer<typeof modelSummarySchema>;
 

@@ -13,6 +13,7 @@ import categoriesRoutes from "./routes/categories.js";
 import tagsRoutes from "./routes/tags.js";
 import printLogsRoutes from "./routes/printLogs.js";
 import filesRoutes from "./routes/files.js";
+import siteLinksRoutes from "./routes/siteLinks.js";
 
 // Reading is public (browse/search/view/download/preview) — only writes
 // (uploading, editing, deleting, logging prints) require a session. Login
@@ -46,6 +47,7 @@ export function buildApp() {
   app.register(tagsRoutes);
   app.register(printLogsRoutes);
   app.register(filesRoutes);
+  app.register(siteLinksRoutes);
 
   if (WEB_DIST_DIR) {
     app.register(fastifyStatic, { root: WEB_DIST_DIR });

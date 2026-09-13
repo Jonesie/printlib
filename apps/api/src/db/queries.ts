@@ -1,8 +1,12 @@
-import type { Category, ModelDetail, ModelFile, ModelSummary, PrintLog, Tag } from "@printlib/shared";
+import type { Category, ModelDetail, ModelFile, ModelSummary, PrintLog, SiteLink, Tag } from "@printlib/shared";
 import { db } from "./index.js";
 
 function rowToCategory(row: any): Category {
   return { id: row.id, name: row.name };
+}
+
+function rowToSiteLink(row: any): SiteLink {
+  return { id: row.id, name: row.name, url: row.url };
 }
 
 function rowToTag(row: any): Tag {
@@ -58,12 +62,13 @@ function toSummary(row: any): ModelSummary {
     lastPrintedAt: row.last_printed_at,
     previewFilename: row.preview_filename ?? null,
     sourceUrl: row.source_url ?? null,
+    rating: row.rating ?? null,
   };
 }
 
 const summaryBaseQuery = `
   SELECT
-    m.id, m.name, m.description, m.created_at, m.category_id, m.preview_filename, m.source_url,
+    m.id, m.name, m.description, m.created_at, m.category_id, m.preview_filename, m.source_url, m.rating,
     c.name AS category_name,
     (SELECT COUNT(*) FROM model_files mf WHERE mf.model_id = m.id) AS file_count,
     (SELECT mf.file_type FROM model_files mf WHERE mf.model_id = m.id
@@ -133,15 +138,24 @@ export function createModel(input: {
 
 export function updateModel(
   id: number,
-  input: { name?: string; description?: string | null; categoryId?: number | null; sourceUrl?: string | null },
+  input: {
+    name?: string;
+    description?: string | null;
+    categoryId?: number | null;
+    sourceUrl?: string | null;
+    rating?: number | null;
+  },
 ): void {
   const current = db.prepare(`SELECT * FROM models WHERE id = ?`).get(id) as any;
   if (!current) throw new Error("Model not found");
-  db.prepare(`UPDATE models SET name = ?, description = ?, category_id = ?, source_url = ? WHERE id = ?`).run(
+  db.prepare(
+    `UPDATE models SET name = ?, description = ?, category_id = ?, source_url = ?, rating = ? WHERE id = ?`,
+  ).run(
     input.name ?? current.name,
     input.description !== undefined ? input.description : current.description,
     input.categoryId !== undefined ? input.categoryId : current.category_id,
     input.sourceUrl !== undefined ? input.sourceUrl : current.source_url,
+    input.rating !== undefined ? input.rating : current.rating,
     id,
   );
 }
@@ -292,4 +306,26 @@ export function updatePrintLog(
 
 export function deletePrintLog(id: number): void {
   db.prepare(`DELETE FROM print_logs WHERE id = ?`).run(id);
+}
+
+export function listSiteLinks(): SiteLink[] {
+  return db.prepare(`SELECT * FROM site_links ORDER BY name`).all().map(rowToSiteLink);
+}
+
+export function createSiteLink(name: string, url: string): SiteLink {
+  const result = db.prepare(`INSERT INTO site_links (name, url) VALUES (?, ?)`).run(name, url);
+  return { id: Number(result.lastInsertRowid), name, url };
+}
+
+export function updateSiteLink(id: number, input: { name?: string; url?: string }): SiteLink {
+  const current = db.prepare(`SELECT * FROM site_links WHERE id = ?`).get(id) as any;
+  if (!current) throw new Error("Site link not found");
+  const name = input.name ?? current.name;
+  const url = input.url ?? current.url;
+  db.prepare(`UPDATE site_links SET name = ?, url = ? WHERE id = ?`).run(name, url, id);
+  return { id, name, url };
+}
+
+export function deleteSiteLink(id: number): void {
+  db.prepare(`DELETE FROM site_links WHERE id = ?`).run(id);
 }

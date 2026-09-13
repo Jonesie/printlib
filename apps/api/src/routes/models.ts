@@ -6,13 +6,14 @@ import {
   createModel,
   deleteModel,
   getModelDetail,
+  getPrintLog,
   listModels,
   setModelPreview,
   setModelTags,
   updateModel,
 } from "../db/queries.js";
 import { storeUpload } from "../lib/upload.js";
-import { MODELS_DIR, PREVIEWS_DIR } from "../config.js";
+import { MODELS_DIR, PREVIEWS_DIR, PRINT_LOGS_DIR } from "../config.js";
 import { isValidSessionToken, SESSION_COOKIE } from "../lib/auth.js";
 
 async function readMultipartBuffer(part: AsyncIterable<Buffer>): Promise<Buffer> {
@@ -93,15 +94,20 @@ export default async function modelsRoutes(app: FastifyInstance) {
       description?: string | null;
       categoryId?: number | null;
       sourceUrl?: string | null;
+      rating?: number | null;
       tags?: string[];
     };
     if (!getModelDetail(id)) return reply.code(404).send({ error: "Model not found" });
+    if (body.rating != null && (body.rating < 1 || body.rating > 5)) {
+      return reply.code(400).send({ error: "rating must be between 1 and 5" });
+    }
 
     updateModel(id, {
       name: body.name,
       description: body.description,
       categoryId: body.categoryId,
       sourceUrl: body.sourceUrl,
+      rating: body.rating,
     });
     if (body.tags) setModelTags(id, body.tags);
     return getModelDetail(id);
@@ -125,6 +131,27 @@ export default async function modelsRoutes(app: FastifyInstance) {
     if (!filename) return reply.code(400).send({ error: "preview file is required" });
 
     setModelPreview(id, filename);
+    return getModelDetail(id);
+  });
+
+  // JSON: { printLogId } — reuses an existing print log photo as the preview
+  app.post("/api/models/:id/preview-from-log", async (request, reply) => {
+    const id = Number((request.params as { id: string }).id);
+    if (!getModelDetail(id)) return reply.code(404).send({ error: "Model not found" });
+
+    const { printLogId } = request.body as { printLogId?: number };
+    const log = printLogId ? getPrintLog(printLogId) : null;
+    if (!log || log.modelId !== id) return reply.code(404).send({ error: "Print log not found" });
+    if (!log.photoFilename) return reply.code(400).send({ error: "That print log has no photo" });
+
+    const sourcePath = path.join(PRINT_LOGS_DIR, log.photoFilename);
+    if (!fs.existsSync(sourcePath)) return reply.code(404).send({ error: "Photo file missing" });
+
+    const ext = log.photoFilename.split(".").pop() || "jpg";
+    const storedName = `${id}-${crypto.randomUUID()}.${ext}`;
+    fs.copyFileSync(sourcePath, path.join(PREVIEWS_DIR, storedName));
+
+    setModelPreview(id, storedName);
     return getModelDetail(id);
   });
 

@@ -1,4 +1,4 @@
-import type { Category, ModelDetail, ModelSummary, Tag } from "@printlib/shared";
+import type { Category, ModelDetail, ModelSummary, SiteLink, Tag } from "@printlib/shared";
 
 async function json<T>(res: Response): Promise<T> {
   if (!res.ok) {
@@ -48,6 +48,7 @@ export const api = {
       description?: string | null;
       categoryId?: number | null;
       sourceUrl?: string | null;
+      rating?: number | null;
       tags?: string[];
     },
   ) {
@@ -116,6 +117,14 @@ export const api = {
     );
   },
 
+  setPreviewFromLog(modelId: number, printLogId: number) {
+    return fetch(`/api/models/${modelId}/preview-from-log`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ printLogId }),
+    }).then((r) => json<ModelDetail>(r));
+  },
+
   fileDownloadUrl(fileId: number) {
     return `/api/files/${fileId}/download`;
   },
@@ -126,5 +135,31 @@ export const api = {
 
   previewUrl(filename: string) {
     return `/api/previews/${filename}`;
+  },
+
+  listSiteLinks() {
+    return fetch(`/api/site-links`).then((r) => json<SiteLink[]>(r));
+  },
+
+  createSiteLink(name: string, url: string) {
+    return fetch(`/api/site-links`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, url }),
+    }).then((r) => json<SiteLink>(r));
+  },
+
+  updateSiteLink(id: number, data: { name?: string; url?: string }) {
+    return fetch(`/api/site-links/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    }).then((r) => json<SiteLink>(r));
+  },
+
+  deleteSiteLink(id: number) {
+    return fetch(`/api/site-links/${id}`, { method: "DELETE" }).then((r) => {
+      if (!r.ok) throw new Error("Failed to delete site link");
+    });
   },
 };

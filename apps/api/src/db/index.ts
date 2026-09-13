@@ -11,6 +11,10 @@ export const db = new Database(DB_PATH);
 db.pragma("journal_mode = WAL");
 db.pragma("foreign_keys = ON");
 
+const siteLinksTableIsNew = !db
+  .prepare(`SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'site_links'`)
+  .get();
+
 db.exec(`
   CREATE TABLE IF NOT EXISTS categories (
     id   INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -57,6 +61,13 @@ db.exec(`
     material       TEXT
   );
 
+  CREATE TABLE IF NOT EXISTS site_links (
+    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    name       TEXT NOT NULL,
+    url        TEXT NOT NULL,
+    created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
+  );
+
   CREATE INDEX IF NOT EXISTS idx_model_files_model_id ON model_files(model_id);
   CREATE INDEX IF NOT EXISTS idx_print_logs_model_id ON print_logs(model_id);
   CREATE INDEX IF NOT EXISTS idx_models_category_id ON models(category_id);
@@ -70,4 +81,23 @@ if (!modelColumns.some((c) => c.name === "preview_filename")) {
 }
 if (!modelColumns.some((c) => c.name === "source_url")) {
   db.exec(`ALTER TABLE models ADD COLUMN source_url TEXT`);
+}
+if (!modelColumns.some((c) => c.name === "rating")) {
+  db.exec(`ALTER TABLE models ADD COLUMN rating INTEGER`);
+}
+
+// Seed a starter set of popular model sites, once, only when the table is
+// being created for the first time — so deleting them all later doesn't
+// bring them back.
+if (siteLinksTableIsNew) {
+  const seedLinks: [string, string][] = [
+    ["Printables", "https://www.printables.com"],
+    ["MakerWorld", "https://makerworld.com"],
+    ["Thingiverse", "https://www.thingiverse.com"],
+    ["MyMiniFactory", "https://www.myminifactory.com"],
+    ["Cults3D", "https://cults3d.com"],
+    ["Gridfinity", "https://gridfinity.xyz"],
+  ];
+  const insert = db.prepare(`INSERT INTO site_links (name, url) VALUES (?, ?)`);
+  for (const [name, url] of seedLinks) insert.run(name, url);
 }

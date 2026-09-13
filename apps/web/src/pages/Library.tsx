@@ -4,6 +4,8 @@ import type { Category, ModelSummary } from "@printlib/shared";
 import { api } from "../api/client";
 import UploadDropzone from "../components/UploadDropzone";
 import CategoryManager from "../components/CategoryManager";
+import SiteLinksPanel from "../components/SiteLinksPanel";
+import StarRating from "../components/StarRating";
 import { useAuth } from "../auth/AuthContext";
 
 export default function Library() {
@@ -32,6 +34,8 @@ export default function Library() {
 
   return (
     <div className="grid gap-6">
+      <SiteLinksPanel />
+
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-1 gap-3">
           <input
@@ -82,6 +86,7 @@ export default function Library() {
                 </div>
               )}
               <h3 className="truncate font-medium">{model.name}</h3>
+              <StarRating rating={model.rating} size="text-xs" />
               <p className="truncate text-sm text-slate-400">
                 {model.category?.name ?? "Uncategorized"} · {model.fileCount} file
                 {model.fileCount === 1 ? "" : "s"}
