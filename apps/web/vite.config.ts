@@ -2,7 +2,16 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { VitePWA } from "vite-plugin-pwa";
 
+// The version shown in the page footer. Local/dev builds fall back to
+// package.json's version; release builds override it via APP_VERSION,
+// set from the git tag by the release workflow (see Dockerfile, which
+// passes this through as a build ARG).
+const appVersion = process.env.APP_VERSION || process.env.npm_package_version || "dev";
+
 export default defineConfig({
+  define: {
+    __APP_VERSION__: JSON.stringify(appVersion),
+  },
   plugins: [
     react(),
     VitePWA({

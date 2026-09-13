@@ -1,10 +1,13 @@
 # Single-container build: builds the web PWA and the API, then serves both
-# from one Node process (API serves the built SPA as static files). This
-# matches how other personal apps in this home stack are deployed — one
-# container per app, reached only via the shared nginx reverse proxy.
+# from one Node process (API serves the built SPA as static files).
 
 FROM node:22-bookworm-slim AS build
 WORKDIR /app
+
+# Shown in the page footer. Defaults to "dev" for local builds; the release
+# workflow passes the git tag through here.
+ARG APP_VERSION=dev
+ENV APP_VERSION=$APP_VERSION
 
 COPY package.json package-lock.json ./
 COPY packages/shared/package.json packages/shared/package.json
@@ -14,6 +17,10 @@ RUN npm install
 
 COPY . .
 RUN npm run build
+
+# Drop devDependencies (typescript, vitest, jsdom, etc.) before the runtime
+# stage copies node_modules wholesale — none of it runs in production.
+RUN npm prune --omit=dev
 
 FROM node:22-bookworm-slim AS runtime
 WORKDIR /app

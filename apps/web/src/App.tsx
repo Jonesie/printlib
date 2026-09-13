@@ -49,6 +49,7 @@ function Footer() {
       >
         Buy me a coffee ☕
       </a>
+      <span>v{__APP_VERSION__}</span>
     </footer>
   );
 }
