@@ -52,6 +52,23 @@ export const printerSchema = z.object({
 });
 export type Printer = z.infer<typeof printerSchema>;
 
+export const socialLinkSchema = z.object({
+  label: z.string(),
+  url: z.string(),
+});
+export type SocialLink = z.infer<typeof socialLinkSchema>;
+
+export const profileSchema = z.object({
+  name: z.string(),
+  avatarFilename: z.string().nullable(),
+  location: z.string().nullable(),
+  note: z.string().nullable(),
+  email: z.string().nullable(),
+  phone: z.string().nullable(),
+  socialLinks: z.array(socialLinkSchema),
+});
+export type Profile = z.infer<typeof profileSchema>;
+
 export const modelFileSchema = z.object({
   id: z.number(),
   modelId: z.number(),

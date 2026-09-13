@@ -1,4 +1,4 @@
-import type { Category, ModelDetail, ModelSummary, Printer, SiteLink, Tag } from "@printlib/shared";
+import type { Category, ModelDetail, ModelSummary, Printer, Profile, SiteLink, Tag } from "@printlib/shared";
 
 async function json<T>(res: Response): Promise<T> {
   if (!res.ok) {
@@ -183,5 +183,17 @@ export const api = {
 
   printerPhotoUrl(filename: string) {
     return `/api/printer-photos/${filename}`;
+  },
+
+  getProfile() {
+    return fetch(`/api/profile`).then((r) => json<Profile | null>(r));
+  },
+
+  saveProfile(form: FormData) {
+    return fetch(`/api/profile`, { method: "PUT", body: form }).then((r) => json<Profile>(r));
+  },
+
+  avatarUrl(filename: string) {
+    return `/api/profile-avatar/${filename}`;
   },
 };

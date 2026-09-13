@@ -26,16 +26,16 @@ export default function PrintersPanel() {
 
   if (printers.length === 0 && !authenticated) return null;
 
-  return (
-    <div className="rounded-lg border border-slate-800 bg-slate-900 p-4">
-      <div className="mb-3 flex items-center justify-between">
-        <h2 className="font-medium text-slate-200">Printers</h2>
-        {authenticated && !adding && (
-          <button onClick={() => setAdding(true)} className="text-sm text-sky-400 hover:text-sky-300">
-            + Add printer
-          </button>
-        )}
-      </div>
+  const content = (
+    <>
+      {authenticated && !adding && (
+        <button
+          onClick={() => setAdding(true)}
+          className="mb-3 text-sm text-sky-400 hover:text-sky-300"
+        >
+          + Add printer
+        </button>
+      )}
 
       {adding && (
         <div className="mb-3">
@@ -52,7 +52,7 @@ export default function PrintersPanel() {
       {printers.length === 0 ? (
         <p className="text-sm text-slate-400">No printers recorded yet.</p>
       ) : (
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-3">
           {printers.map((printer) =>
             editingId === printer.id ? (
               <PrinterForm
@@ -65,40 +65,38 @@ export default function PrintersPanel() {
                 onCancel={() => setEditingId(null)}
               />
             ) : (
-              <div key={printer.id} className="flex gap-3 rounded-lg bg-slate-800 p-3">
+              <div key={printer.id} className="rounded-lg bg-slate-800 p-3">
                 {printer.photoFilename && (
                   <img
                     src={api.printerPhotoUrl(printer.photoFilename)}
                     alt={printer.name}
                     onClick={() => setLightboxSrc(api.printerPhotoUrl(printer.photoFilename!))}
-                    className="h-20 w-20 shrink-0 cursor-zoom-in rounded object-cover"
+                    className="mb-2 aspect-square w-full cursor-zoom-in rounded object-cover"
                   />
                 )}
-                <div className="min-w-0 flex-1">
-                  <h3 className="truncate font-medium">{printer.name}</h3>
-                  {printer.model && <p className="truncate text-sm text-slate-400">{printer.model}</p>}
-                  {(printer.purchasedAt || printer.price != null) && (
-                    <p className="text-xs text-slate-500">
-                      {[
-                        printer.purchasedAt && new Date(printer.purchasedAt).toLocaleDateString(),
-                        printer.price != null && `$${printer.price.toFixed(2)}`,
-                      ]
-                        .filter(Boolean)
-                        .join(" · ")}
-                    </p>
-                  )}
-                  {printer.notes && <p className="mt-1 text-sm text-slate-300">{printer.notes}</p>}
-                  {authenticated && (
-                    <div className="mt-2 flex gap-3 text-sm">
-                      <button onClick={() => setEditingId(printer.id)} className="text-sky-400 hover:text-sky-300">
-                        Edit
-                      </button>
-                      <button onClick={() => remove(printer)} className="text-red-400 hover:text-red-300">
-                        Delete
-                      </button>
-                    </div>
-                  )}
-                </div>
+                <h3 className="truncate font-medium">{printer.name}</h3>
+                {printer.model && <p className="truncate text-sm text-slate-400">{printer.model}</p>}
+                {(printer.purchasedAt || printer.price != null) && (
+                  <p className="text-xs text-slate-500">
+                    {[
+                      printer.purchasedAt && new Date(printer.purchasedAt).toLocaleDateString(),
+                      printer.price != null && `$${printer.price.toFixed(2)}`,
+                    ]
+                      .filter(Boolean)
+                      .join(" · ")}
+                  </p>
+                )}
+                {printer.notes && <p className="mt-1 text-sm text-slate-300">{printer.notes}</p>}
+                {authenticated && (
+                  <div className="mt-2 flex gap-3 text-sm">
+                    <button onClick={() => setEditingId(printer.id)} className="text-sky-400 hover:text-sky-300">
+                      Edit
+                    </button>
+                    <button onClick={() => remove(printer)} className="text-red-400 hover:text-red-300">
+                      Delete
+                    </button>
+                  </div>
+                )}
               </div>
             ),
           )}
@@ -106,6 +104,22 @@ export default function PrintersPanel() {
       )}
 
       <Lightbox src={lightboxSrc} onClose={() => setLightboxSrc(null)} />
-    </div>
+    </>
+  );
+
+  return (
+    <>
+      {/* Mobile: a collapsible section ahead of search/results, collapsed by default. */}
+      <details className="order-2 rounded-lg border border-slate-800 bg-slate-900 p-4 lg:hidden">
+        <summary className="cursor-pointer font-medium text-slate-200">Printers</summary>
+        <div className="mt-3">{content}</div>
+      </details>
+
+      {/* Desktop: an always-visible sidebar column. */}
+      <aside className="order-3 hidden rounded-lg border border-slate-800 bg-slate-900 p-4 lg:sticky lg:top-6 lg:block lg:self-start">
+        <h2 className="mb-3 font-medium text-slate-200">Printers</h2>
+        {content}
+      </aside>
+    </>
   );
 }

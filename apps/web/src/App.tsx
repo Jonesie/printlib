@@ -46,7 +46,7 @@ export default function App() {
       <AuthProvider>
         <div className="min-h-screen">
           <Header />
-          <main className="mx-auto max-w-6xl px-4 py-6">
+          <main className="px-4 py-6">
             <Routes>
               <Route path="/" element={<Library />} />
               <Route path="/models/:id" element={<ModelDetail />} />

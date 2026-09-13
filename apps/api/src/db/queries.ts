@@ -1,4 +1,4 @@
-import type { Category, ModelDetail, ModelFile, ModelSummary, Printer, PrintLog, SiteLink, Tag } from "@printlib/shared";
+import type { Category, ModelDetail, ModelFile, ModelSummary, Printer, PrintLog, Profile, SiteLink, Tag } from "@printlib/shared";
 import { db } from "./index.js";
 
 function rowToCategory(row: any): Category {
@@ -403,4 +403,65 @@ export function updatePrinter(id: number, input: Partial<PrinterInput>): Printer
 
 export function deletePrinter(id: number): void {
   db.prepare(`DELETE FROM printers WHERE id = ?`).run(id);
+}
+
+function rowToProfile(row: any): Profile {
+  return {
+    name: row.name,
+    avatarFilename: row.avatar_filename,
+    location: row.location,
+    note: row.note,
+    email: row.email,
+    phone: row.phone,
+    socialLinks: JSON.parse(row.social_links || "[]"),
+  };
+}
+
+export function getProfile(): Profile | null {
+  const row = db.prepare(`SELECT * FROM profile WHERE id = 1`).get();
+  return row ? rowToProfile(row) : null;
+}
+
+export interface ProfileInput {
+  name: string;
+  avatarFilename?: string | null;
+  location?: string | null;
+  note?: string | null;
+  email?: string | null;
+  phone?: string | null;
+  socialLinks?: { label: string; url: string }[];
+}
+
+export function saveProfile(input: ProfileInput): Profile {
+  const current = db.prepare(`SELECT * FROM profile WHERE id = 1`).get() as any;
+  const merged = {
+    name: input.name,
+    avatar_filename: input.avatarFilename !== undefined ? input.avatarFilename : (current?.avatar_filename ?? null),
+    location: input.location !== undefined ? input.location : (current?.location ?? null),
+    note: input.note !== undefined ? input.note : (current?.note ?? null),
+    email: input.email !== undefined ? input.email : (current?.email ?? null),
+    phone: input.phone !== undefined ? input.phone : (current?.phone ?? null),
+    social_links: JSON.stringify(input.socialLinks ?? (current ? JSON.parse(current.social_links) : [])),
+  };
+  db.prepare(
+    `INSERT INTO profile (id, name, avatar_filename, location, note, email, phone, social_links)
+     VALUES (1, ?, ?, ?, ?, ?, ?, ?)
+     ON CONFLICT(id) DO UPDATE SET
+       name = excluded.name,
+       avatar_filename = excluded.avatar_filename,
+       location = excluded.location,
+       note = excluded.note,
+       email = excluded.email,
+       phone = excluded.phone,
+       social_links = excluded.social_links`,
+  ).run(
+    merged.name,
+    merged.avatar_filename,
+    merged.location,
+    merged.note,
+    merged.email,
+    merged.phone,
+    merged.social_links,
+  );
+  return rowToProfile(merged);
 }

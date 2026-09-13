@@ -71,7 +71,7 @@ export default function ModelDetail() {
   }
 
   return (
-    <div className="grid gap-6">
+    <div className="mx-auto grid max-w-6xl gap-6">
       <Link to="/" className="text-sm text-slate-400 hover:text-slate-200">
         ← Back to library
       </Link>

@@ -15,6 +15,7 @@ import printLogsRoutes from "./routes/printLogs.js";
 import filesRoutes from "./routes/files.js";
 import siteLinksRoutes from "./routes/siteLinks.js";
 import printersRoutes from "./routes/printers.js";
+import profileRoutes from "./routes/profile.js";
 
 // Reading is public (browse/search/view/download/preview) — only writes
 // (uploading, editing, deleting, logging prints) require a session. Login
@@ -50,6 +51,7 @@ export function buildApp() {
   app.register(filesRoutes);
   app.register(siteLinksRoutes);
   app.register(printersRoutes);
+  app.register(profileRoutes);
 
   if (WEB_DIST_DIR) {
     app.register(fastifyStatic, { root: WEB_DIST_DIR });

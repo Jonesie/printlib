@@ -5,6 +5,7 @@ export const MODELS_DIR = path.join(DATA_DIR, "models");
 export const PRINT_LOGS_DIR = path.join(DATA_DIR, "print-logs");
 export const PREVIEWS_DIR = path.join(DATA_DIR, "previews");
 export const PRINTERS_DIR = path.join(DATA_DIR, "printers");
+export const AVATARS_DIR = path.join(DATA_DIR, "avatars");
 export const DB_PATH = path.join(DATA_DIR, "printlib.sqlite");
 
 export const PORT = Number(process.env.PORT ?? 8000);
