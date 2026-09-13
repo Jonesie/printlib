@@ -5,6 +5,7 @@ import Login from "./pages/Login";
 import { api } from "./api/client";
 import { AuthProvider, useAuth } from "./auth/AuthContext";
 import { ThemeProvider, THEMES, useTheme } from "./theme/ThemeContext";
+import Dropdown from "./components/Dropdown";
 
 function Header() {
   const { authenticated, refresh } = useAuth();
@@ -15,18 +16,7 @@ function Header() {
         PrintLib
       </Link>
       <div className="flex items-center gap-4">
-        <select
-          value={theme}
-          onChange={(e) => setTheme(e.target.value as typeof theme)}
-          className="rounded bg-slate-800 px-2 py-1 text-sm text-slate-300"
-          aria-label="Color theme"
-        >
-          {THEMES.map((t) => (
-            <option key={t.id} value={t.id}>
-              {t.name}
-            </option>
-          ))}
-        </select>
+        <Dropdown value={theme} options={[...THEMES]} onChange={setTheme} ariaLabel="Color theme" />
         {authenticated && (
           <button
             onClick={() => api.logout().then(refresh)}
