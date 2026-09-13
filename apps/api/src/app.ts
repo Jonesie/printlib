@@ -25,7 +25,7 @@ import profileRoutes from "./routes/profile.js";
 const PUBLIC_WRITE_ROUTES = new Set(["/api/login", "/api/logout"]);
 
 export function buildApp() {
-  const app = Fastify({ logger: true });
+  const app = Fastify({ logger: !process.env.VITEST });
 
   app.register(fastifyCors, { origin: true, credentials: true });
   app.register(fastifyCookie);
