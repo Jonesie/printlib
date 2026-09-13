@@ -40,19 +40,43 @@ function Header() {
   );
 }
 
+function Footer() {
+  return (
+    <footer className="mt-auto flex justify-center gap-4 border-t border-slate-800 px-4 py-4 text-sm text-slate-500">
+      <a
+        href="https://github.com/Jonesie/printlib"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="hover:text-slate-300"
+      >
+        GitHub
+      </a>
+      <a
+        href="https://www.buymeacoffee.com/jonesie"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="hover:text-slate-300"
+      >
+        Buy me a coffee ☕
+      </a>
+    </footer>
+  );
+}
+
 export default function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <div className="min-h-screen">
+        <div className="flex min-h-screen flex-col">
           <Header />
-          <main className="px-4 py-6">
+          <main className="flex-1 px-4 py-6">
             <Routes>
               <Route path="/" element={<Library />} />
               <Route path="/models/:id" element={<ModelDetail />} />
               <Route path="/login" element={<Login />} />
             </Routes>
           </main>
+          <Footer />
         </div>
       </AuthProvider>
     </ThemeProvider>

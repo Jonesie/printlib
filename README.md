@@ -105,4 +105,4 @@ something non-trivial, a quick note in the PR about how you verified it
 
 ---
 
-If PrintLib is useful to you, consider [buying me a coffee](https://www.buymeacoffee.com/YOUR_USERNAME_HERE) ☕
+If PrintLib is useful to you, consider [buying me a coffee](https://www.buymeacoffee.com/jonesie) ☕
