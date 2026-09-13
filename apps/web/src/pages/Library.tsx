@@ -70,7 +70,7 @@ export default function Library() {
 
   return (
     <div className="mx-auto grid max-w-[1600px] grid-cols-1 gap-6 lg:grid-cols-[260px_1fr_260px] lg:items-start">
-      <div className="order-1 lg:sticky lg:top-6">
+      <div className="order-1 min-w-0 lg:sticky lg:top-6">
         <ProfilePanel />
       </div>
 

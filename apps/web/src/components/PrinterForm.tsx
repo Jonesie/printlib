@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { Printer } from "@printlib/shared";
 import { api } from "../api/client";
+import FilePickerButton from "./FilePickerButton";
 
 export default function PrinterForm({
   printer,
@@ -51,7 +52,7 @@ export default function PrinterForm({
 
   return (
     <div className="rounded-lg border border-slate-800 bg-slate-900 p-4">
-      <div className="grid gap-3">
+      <div className="grid grid-cols-1 gap-3">
         <input
           className="rounded bg-slate-800 px-3 py-2"
           placeholder="Name (e.g. Workhorse)"
@@ -86,7 +87,7 @@ export default function PrinterForm({
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
         />
-        <input type="file" accept="image/*" onChange={(e) => setPhoto(e.target.files?.[0] ?? null)} />
+        <FilePickerButton file={photo} onChange={setPhoto} />
         {printer?.photoFilename && !photo && (
           <p className="text-xs text-slate-500">Leave blank to keep the existing photo.</p>
         )}

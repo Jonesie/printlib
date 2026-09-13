@@ -52,7 +52,7 @@ export default function PrintersPanel() {
       {printers.length === 0 ? (
         <p className="text-sm text-slate-400">No printers recorded yet.</p>
       ) : (
-        <div className="grid gap-3">
+        <div className="grid grid-cols-1 gap-3">
           {printers.map((printer) =>
             editingId === printer.id ? (
               <PrinterForm
@@ -116,7 +116,7 @@ export default function PrintersPanel() {
       </details>
 
       {/* Desktop: an always-visible sidebar column. */}
-      <aside className="order-3 hidden rounded-lg border border-slate-800 bg-slate-900 p-4 lg:sticky lg:top-6 lg:block lg:self-start">
+      <aside className="order-3 hidden min-w-0 rounded-lg border border-slate-800 bg-slate-900 p-4 lg:sticky lg:top-6 lg:block lg:self-start">
         <h2 className="mb-3 font-medium text-slate-200">Printers</h2>
         {content}
       </aside>

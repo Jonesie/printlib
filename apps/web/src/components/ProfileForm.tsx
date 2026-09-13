@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { Profile, SocialLink } from "@printlib/shared";
 import { api } from "../api/client";
+import FilePickerButton from "./FilePickerButton";
 
 export default function ProfileForm({
   profile,
@@ -61,14 +62,14 @@ export default function ProfileForm({
   }
 
   return (
-    <div className="grid gap-3">
+    <div className="grid grid-cols-1 gap-3">
       <input
         className="rounded bg-slate-800 px-3 py-2 text-sm"
         placeholder="Name"
         value={name}
         onChange={(e) => setName(e.target.value)}
       />
-      <input type="file" accept="image/*" onChange={(e) => setAvatar(e.target.files?.[0] ?? null)} />
+      <FilePickerButton file={avatar} onChange={setAvatar} placeholder="Choose avatar…" />
       {profile?.avatarFilename && !avatar && (
         <p className="text-xs text-slate-500">Leave blank to keep the existing avatar.</p>
       )}
@@ -97,7 +98,7 @@ export default function ProfileForm({
         onChange={(e) => setPhone(e.target.value)}
       />
 
-      <div className="grid gap-2">
+      <div className="grid grid-cols-1 gap-2">
         <p className="text-xs text-slate-500">Social links</p>
         {socialLinks.map((link, i) => (
           <div key={i} className="flex items-center gap-2">
@@ -117,7 +118,7 @@ export default function ProfileForm({
             onChange={(e) => setNewLabel(e.target.value)}
           />
           <input
-            className="flex-1 rounded bg-slate-800 px-2 py-1 text-sm"
+            className="min-w-0 flex-1 rounded bg-slate-800 px-2 py-1 text-sm"
             placeholder="https://..."
             value={newUrl}
             onChange={(e) => setNewUrl(e.target.value)}

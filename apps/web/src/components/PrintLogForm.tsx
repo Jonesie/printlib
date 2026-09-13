@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { PrintLog } from "@printlib/shared";
 import { api } from "../api/client";
+import FilePickerButton from "./FilePickerButton";
 
 // Local calendar date, not toISOString()'s UTC date — otherwise this shows
 // the wrong day whenever local time and UTC fall on different calendar
@@ -68,7 +69,7 @@ function PrintLogFields({
 
   return (
     <div className="rounded-lg border border-slate-800 bg-slate-900 p-4">
-      <div className="grid gap-3">
+      <div className="grid grid-cols-1 gap-3">
         <div className="flex gap-4">
           <label className="flex items-center gap-2">
             <input type="radio" checked={success} onChange={() => setSuccess(true)} /> Success
@@ -103,7 +104,7 @@ function PrintLogFields({
             onChange={(e) => setMaterial(e.target.value)}
           />
         </div>
-        <input type="file" accept="image/*" onChange={(e) => setPhoto(e.target.files?.[0] ?? null)} />
+        <FilePickerButton file={photo} onChange={setPhoto} />
         {log?.photoFilename && !photo && (
           <p className="text-xs text-slate-500">Leave blank to keep the existing photo.</p>
         )}

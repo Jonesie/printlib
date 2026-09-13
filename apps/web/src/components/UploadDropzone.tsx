@@ -85,7 +85,7 @@ export default function UploadDropzone({
         </button>
       </div>
 
-      <div className="grid gap-3">
+      <div className="grid grid-cols-1 gap-3">
         <input
           className="rounded bg-slate-800 px-3 py-2"
           placeholder="Name"

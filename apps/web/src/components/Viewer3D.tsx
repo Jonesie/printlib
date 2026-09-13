@@ -58,7 +58,7 @@ export default function Viewer3D({
   }
 
   return (
-    <div className="grid gap-2">
+    <div className="grid grid-cols-1 gap-2">
       <div className="h-80 w-full rounded-lg border border-slate-800 bg-slate-900">
         <Canvas
           camera={{ position: [80, 80, 80], fov: 45 }}

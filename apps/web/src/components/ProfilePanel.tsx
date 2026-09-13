@@ -36,7 +36,7 @@ export default function ProfilePanel() {
           onCancel={() => setEditing(false)}
         />
       ) : profile ? (
-        <div className="grid gap-2">
+        <div className="grid grid-cols-1 gap-2">
           {profile.avatarFilename && (
             <img
               src={api.avatarUrl(profile.avatarFilename)}
@@ -50,7 +50,7 @@ export default function ProfilePanel() {
           {profile.note && <p className="text-sm text-slate-300">{profile.note}</p>}
 
           {(profile.email || profile.phone) && (
-            <div className="grid gap-0.5 text-sm">
+            <div className="grid grid-cols-1 gap-0.5 text-sm">
               {profile.email && (
                 <a href={`mailto:${profile.email}`} className="text-sky-400 hover:text-sky-300">
                   {profile.email}

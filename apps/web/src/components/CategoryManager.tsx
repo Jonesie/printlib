@@ -31,7 +31,7 @@ function CategoryRow({ category, onChanged }: { category: Category; onChanged: (
   return (
     <div className="flex items-center gap-2">
       <input
-        className="flex-1 rounded bg-slate-800 px-3 py-1.5 text-sm"
+        className="min-w-0 flex-1 rounded bg-slate-800 px-3 py-1.5 text-sm"
         value={name}
         onChange={(e) => setName(e.target.value)}
         onBlur={rename}
@@ -80,13 +80,13 @@ export default function CategoryManager({
           Close
         </button>
       </div>
-      <div className="grid gap-2">
+      <div className="grid grid-cols-1 gap-2">
         {categories.map((c) => (
           <CategoryRow key={c.id} category={c} onChanged={onChanged} />
         ))}
         <div className="mt-2 flex gap-2">
           <input
-            className="flex-1 rounded bg-slate-800 px-3 py-1.5 text-sm"
+            className="min-w-0 flex-1 rounded bg-slate-800 px-3 py-1.5 text-sm"
             placeholder="New category"
             value={newName}
             onChange={(e) => setNewName(e.target.value)}

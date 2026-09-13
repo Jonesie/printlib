@@ -28,7 +28,7 @@ function EditableRow({ link, onChanged }: { link: SiteLink; onChanged: () => voi
         onBlur={save}
       />
       <input
-        className="flex-1 rounded bg-slate-800 px-2 py-1 text-sm"
+        className="min-w-0 flex-1 rounded bg-slate-800 px-2 py-1 text-sm"
         value={url}
         onChange={(e) => setUrl(e.target.value)}
         onBlur={save}
@@ -75,7 +75,7 @@ export default function SiteLinksPanel() {
       </div>
 
       {editing && authenticated ? (
-        <div className="grid gap-2">
+        <div className="grid grid-cols-1 gap-2">
           {links.map((link) => (
             <EditableRow key={link.id} link={link} onChanged={refresh} />
           ))}
@@ -87,7 +87,7 @@ export default function SiteLinksPanel() {
               onChange={(e) => setNewName(e.target.value)}
             />
             <input
-              className="flex-1 rounded bg-slate-800 px-2 py-1 text-sm"
+              className="min-w-0 flex-1 rounded bg-slate-800 px-2 py-1 text-sm"
               placeholder="https://..."
               value={newUrl}
               onChange={(e) => setNewUrl(e.target.value)}

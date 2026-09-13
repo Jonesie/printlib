@@ -76,7 +76,7 @@ export default function ModelDetail() {
         ← Back to library
       </Link>
 
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         <div>
           {stlFile ? (
             <Viewer3D
@@ -92,7 +92,7 @@ export default function ModelDetail() {
           )}
         </div>
 
-        <div className="grid gap-3">
+        <div className="grid grid-cols-1 gap-3">
           {authenticated ? (
             <>
               <div className="flex items-start justify-between gap-3">
@@ -172,7 +172,7 @@ export default function ModelDetail() {
               <summary className="mb-1 cursor-pointer font-medium text-slate-200">
                 Files ({model.files.length})
               </summary>
-              <ul className="grid gap-1">
+              <ul className="grid grid-cols-1 gap-1">
                 {model.files.map((file) => (
                   <li key={file.id} className="flex items-center justify-between rounded bg-slate-900 px-3 py-2 text-sm">
                     <span>
@@ -204,7 +204,7 @@ export default function ModelDetail() {
       </div>
 
       {authenticated && (
-        <div className="grid gap-3">
+        <div className="grid grid-cols-1 gap-3">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold">Print history</h2>
             <PrintLogForm modelId={model.id} onAdded={refresh} />
@@ -213,7 +213,7 @@ export default function ModelDetail() {
           {model.printLogs.length === 0 ? (
             <p className="text-slate-400">No prints logged yet.</p>
           ) : (
-            <ul className="grid gap-3">
+            <ul className="grid grid-cols-1 gap-3">
               {model.printLogs.map((log) =>
                 editingLogId === log.id ? (
                   <li key={log.id}>
@@ -230,7 +230,7 @@ export default function ModelDetail() {
                 ) : (
                   <li key={log.id} className="flex gap-4 rounded-lg border border-slate-800 bg-slate-900 p-4">
                     {log.photoFilename && (
-                      <div className="grid gap-1">
+                      <div className="grid grid-cols-1 gap-1">
                         <img
                           src={api.printLogPhotoUrl(log.photoFilename)}
                           alt="Print result"
