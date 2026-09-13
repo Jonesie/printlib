@@ -5,6 +5,7 @@ import { api } from "../api/client";
 import UploadDropzone from "../components/UploadDropzone";
 import CategoryManager from "../components/CategoryManager";
 import SiteLinksPanel from "../components/SiteLinksPanel";
+import PrintersPanel from "../components/PrintersPanel";
 import StarRating from "../components/StarRating";
 import Lightbox from "../components/Lightbox";
 import { useAuth } from "../auth/AuthContext";
@@ -69,6 +70,7 @@ export default function Library() {
   return (
     <div className="grid gap-6">
       <SiteLinksPanel />
+      <PrintersPanel />
 
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-1 gap-3">

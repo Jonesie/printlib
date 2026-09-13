@@ -1,4 +1,4 @@
-import type { Category, ModelDetail, ModelFile, ModelSummary, PrintLog, SiteLink, Tag } from "@printlib/shared";
+import type { Category, ModelDetail, ModelFile, ModelSummary, Printer, PrintLog, SiteLink, Tag } from "@printlib/shared";
 import { db } from "./index.js";
 
 function rowToCategory(row: any): Category {
@@ -7,6 +7,18 @@ function rowToCategory(row: any): Category {
 
 function rowToSiteLink(row: any): SiteLink {
   return { id: row.id, name: row.name, url: row.url };
+}
+
+function rowToPrinter(row: any): Printer {
+  return {
+    id: row.id,
+    name: row.name,
+    model: row.model,
+    purchasedAt: row.purchased_at,
+    price: row.price,
+    photoFilename: row.photo_filename,
+    notes: row.notes,
+  };
 }
 
 function rowToTag(row: any): Tag {
@@ -328,4 +340,67 @@ export function updateSiteLink(id: number, input: { name?: string; url?: string 
 
 export function deleteSiteLink(id: number): void {
   db.prepare(`DELETE FROM site_links WHERE id = ?`).run(id);
+}
+
+export function listPrinters(): Printer[] {
+  return db.prepare(`SELECT * FROM printers ORDER BY created_at DESC`).all().map(rowToPrinter);
+}
+
+export function getPrinterRaw(id: number): Printer | null {
+  const row = db.prepare(`SELECT * FROM printers WHERE id = ?`).get(id);
+  return row ? rowToPrinter(row) : null;
+}
+
+export interface PrinterInput {
+  name: string;
+  model?: string | null;
+  purchasedAt?: string | null;
+  price?: number | null;
+  photoFilename?: string | null;
+  notes?: string | null;
+}
+
+export function createPrinter(input: PrinterInput): Printer {
+  const result = db
+    .prepare(
+      `INSERT INTO printers (name, model, purchased_at, price, photo_filename, notes) VALUES (?, ?, ?, ?, ?, ?)`,
+    )
+    .run(
+      input.name,
+      input.model ?? null,
+      input.purchasedAt ?? null,
+      input.price ?? null,
+      input.photoFilename ?? null,
+      input.notes ?? null,
+    );
+  return {
+    id: Number(result.lastInsertRowid),
+    name: input.name,
+    model: input.model ?? null,
+    purchasedAt: input.purchasedAt ?? null,
+    price: input.price ?? null,
+    photoFilename: input.photoFilename ?? null,
+    notes: input.notes ?? null,
+  };
+}
+
+export function updatePrinter(id: number, input: Partial<PrinterInput>): Printer {
+  const current = db.prepare(`SELECT * FROM printers WHERE id = ?`).get(id) as any;
+  if (!current) throw new Error("Printer not found");
+  const merged = {
+    name: input.name ?? current.name,
+    model: input.model !== undefined ? input.model : current.model,
+    purchased_at: input.purchasedAt !== undefined ? input.purchasedAt : current.purchased_at,
+    price: input.price !== undefined ? input.price : current.price,
+    photo_filename: input.photoFilename !== undefined ? input.photoFilename : current.photo_filename,
+    notes: input.notes !== undefined ? input.notes : current.notes,
+  };
+  db.prepare(
+    `UPDATE printers SET name = ?, model = ?, purchased_at = ?, price = ?, photo_filename = ?, notes = ? WHERE id = ?`,
+  ).run(merged.name, merged.model, merged.purchased_at, merged.price, merged.photo_filename, merged.notes, id);
+  return rowToPrinter({ ...merged, id });
+}
+
+export function deletePrinter(id: number): void {
+  db.prepare(`DELETE FROM printers WHERE id = ?`).run(id);
 }

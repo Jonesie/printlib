@@ -1,4 +1,4 @@
-import type { Category, ModelDetail, ModelSummary, SiteLink, Tag } from "@printlib/shared";
+import type { Category, ModelDetail, ModelSummary, Printer, SiteLink, Tag } from "@printlib/shared";
 
 async function json<T>(res: Response): Promise<T> {
   if (!res.ok) {
@@ -161,5 +161,27 @@ export const api = {
     return fetch(`/api/site-links/${id}`, { method: "DELETE" }).then((r) => {
       if (!r.ok) throw new Error("Failed to delete site link");
     });
+  },
+
+  listPrinters() {
+    return fetch(`/api/printers`).then((r) => json<Printer[]>(r));
+  },
+
+  createPrinter(form: FormData) {
+    return fetch(`/api/printers`, { method: "POST", body: form }).then((r) => json<Printer>(r));
+  },
+
+  updatePrinter(id: number, form: FormData) {
+    return fetch(`/api/printers/${id}`, { method: "PATCH", body: form }).then((r) => json<Printer>(r));
+  },
+
+  deletePrinter(id: number) {
+    return fetch(`/api/printers/${id}`, { method: "DELETE" }).then((r) => {
+      if (!r.ok) throw new Error("Failed to delete printer");
+    });
+  },
+
+  printerPhotoUrl(filename: string) {
+    return `/api/printer-photos/${filename}`;
   },
 };

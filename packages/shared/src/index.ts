@@ -41,6 +41,17 @@ export const siteLinkSchema = z.object({
 });
 export type SiteLink = z.infer<typeof siteLinkSchema>;
 
+export const printerSchema = z.object({
+  id: z.number(),
+  name: z.string(),
+  model: z.string().nullable(),
+  purchasedAt: z.string().nullable(),
+  price: z.number().nullable(),
+  photoFilename: z.string().nullable(),
+  notes: z.string().nullable(),
+});
+export type Printer = z.infer<typeof printerSchema>;
+
 export const modelFileSchema = z.object({
   id: z.number(),
   modelId: z.number(),
