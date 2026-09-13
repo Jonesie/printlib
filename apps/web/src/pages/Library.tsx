@@ -95,7 +95,7 @@ export default function Library() {
                   ))}
                 </div>
               )}
-              {model.printCount > 0 && (
+              {authenticated && model.printCount > 0 && (
                 <p className="mt-2 text-xs text-emerald-400">
                   Printed {model.printCount}× · last {new Date(model.lastPrintedAt!).toLocaleDateString()}
                 </p>

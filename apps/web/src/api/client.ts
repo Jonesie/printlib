@@ -41,7 +41,16 @@ export const api = {
     return fetch(`/api/models`, { method: "POST", body: form }).then((r) => json<ModelDetail>(r));
   },
 
-  updateModel(id: number, data: { name?: string; description?: string | null; categoryId?: number | null; tags?: string[] }) {
+  updateModel(
+    id: number,
+    data: {
+      name?: string;
+      description?: string | null;
+      categoryId?: number | null;
+      sourceUrl?: string | null;
+      tags?: string[];
+    },
+  ) {
     return fetch(`/api/models/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },

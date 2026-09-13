@@ -14,6 +14,7 @@ export default function UploadDropzone({
   const [description, setDescription] = useState("");
   const [categoryId, setCategoryId] = useState<string>("");
   const [newCategory, setNewCategory] = useState("");
+  const [sourceUrl, setSourceUrl] = useState("");
   const [tags, setTags] = useState("");
   const [files, setFiles] = useState<File[]>([]);
   const [dragOver, setDragOver] = useState(false);
@@ -43,6 +44,7 @@ export default function UploadDropzone({
       form.set("name", name.trim());
       if (description.trim()) form.set("description", description.trim());
       if (finalCategoryId) form.set("categoryId", String(finalCategoryId));
+      if (sourceUrl.trim()) form.set("sourceUrl", sourceUrl.trim());
       if (tags.trim()) form.set("tags", tags.trim());
       for (const file of files) form.append("file", file);
 
@@ -52,6 +54,7 @@ export default function UploadDropzone({
       setDescription("");
       setCategoryId("");
       setNewCategory("");
+      setSourceUrl("");
       setTags("");
       setFiles([]);
       onUploaded();
@@ -115,6 +118,12 @@ export default function UploadDropzone({
             onChange={(e) => setNewCategory(e.target.value)}
           />
         </div>
+        <input
+          className="rounded bg-slate-800 px-3 py-2"
+          placeholder="Source URL (optional) — e.g. the Printables/Thingiverse page"
+          value={sourceUrl}
+          onChange={(e) => setSourceUrl(e.target.value)}
+        />
         <input
           className="rounded bg-slate-800 px-3 py-2"
           placeholder="Tags, comma separated"

@@ -68,3 +68,6 @@ const modelColumns = db.prepare(`PRAGMA table_info(models)`).all() as { name: st
 if (!modelColumns.some((c) => c.name === "preview_filename")) {
   db.exec(`ALTER TABLE models ADD COLUMN preview_filename TEXT`);
 }
+if (!modelColumns.some((c) => c.name === "source_url")) {
+  db.exec(`ALTER TABLE models ADD COLUMN source_url TEXT`);
+}

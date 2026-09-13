@@ -17,6 +17,7 @@ export default function ModelDetail() {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [categoryId, setCategoryId] = useState<string>("");
+  const [sourceUrl, setSourceUrl] = useState("");
   const [savingModel, setSavingModel] = useState(false);
   const [editingLogId, setEditingLogId] = useState<number | null>(null);
 
@@ -26,6 +27,7 @@ export default function ModelDetail() {
     setName(m.name);
     setDescription(m.description ?? "");
     setCategoryId(m.category ? String(m.category.id) : "");
+    setSourceUrl(m.sourceUrl ?? "");
   }
 
   useEffect(() => {
@@ -51,6 +53,7 @@ export default function ModelDetail() {
         name,
         description: description.trim() ? description : null,
         categoryId: categoryId ? Number(categoryId) : null,
+        sourceUrl: sourceUrl.trim() ? sourceUrl.trim() : null,
       });
       refresh();
     } finally {
@@ -120,6 +123,13 @@ export default function ModelDetail() {
                 ))}
               </select>
 
+              <input
+                className="rounded bg-slate-800 px-3 py-2"
+                placeholder="Source URL (optional) — e.g. the Printables/Thingiverse page"
+                value={sourceUrl}
+                onChange={(e) => setSourceUrl(e.target.value)}
+              />
+
               <button
                 onClick={saveModelFields}
                 disabled={savingModel}
@@ -145,68 +155,84 @@ export default function ModelDetail() {
             </>
           )}
 
-          <div>
-            <h2 className="mb-1 font-medium text-slate-200">Files</h2>
-            <ul className="grid gap-1">
-              {model.files.map((file) => (
-                <li key={file.id} className="flex items-center justify-between rounded bg-slate-900 px-3 py-2 text-sm">
-                  <span>
-                    {file.filename} <span className="text-slate-500">({file.fileType})</span>
-                  </span>
-                  <a href={api.fileDownloadUrl(file.id)} className="text-sky-400 hover:text-sky-300">
-                    Download
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
+          {authenticated ? (
+            <div>
+              <h2 className="mb-1 font-medium text-slate-200">Files</h2>
+              <ul className="grid gap-1">
+                {model.files.map((file) => (
+                  <li key={file.id} className="flex items-center justify-between rounded bg-slate-900 px-3 py-2 text-sm">
+                    <span>
+                      {file.filename} <span className="text-slate-500">({file.fileType})</span>
+                    </span>
+                    <a href={api.fileDownloadUrl(file.id)} className="text-sky-400 hover:text-sky-300">
+                      Download
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : (
+            model.sourceUrl && (
+              <div>
+                <h2 className="mb-1 font-medium text-slate-200">Source</h2>
+                <a
+                  href={model.sourceUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="break-all text-sm text-sky-400 hover:text-sky-300"
+                >
+                  {model.sourceUrl}
+                </a>
+              </div>
+            )
+          )}
         </div>
       </div>
 
-      <div className="grid gap-3">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold">Print history</h2>
-          {authenticated && <PrintLogForm modelId={model.id} onAdded={refresh} />}
-        </div>
+      {authenticated && (
+        <div className="grid gap-3">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold">Print history</h2>
+            <PrintLogForm modelId={model.id} onAdded={refresh} />
+          </div>
 
-        {model.printLogs.length === 0 ? (
-          <p className="text-slate-400">No prints logged yet.</p>
-        ) : (
-          <ul className="grid gap-3">
-            {model.printLogs.map((log) =>
-              editingLogId === log.id ? (
-                <li key={log.id}>
-                  <EditPrintLogForm
-                    modelId={model.id}
-                    log={log}
-                    onSaved={() => {
-                      setEditingLogId(null);
-                      refresh();
-                    }}
-                    onCancel={() => setEditingLogId(null)}
-                  />
-                </li>
-              ) : (
-                <li key={log.id} className="flex gap-4 rounded-lg border border-slate-800 bg-slate-900 p-4">
-                  {log.photoFilename && (
-                    <img
-                      src={api.printLogPhotoUrl(log.photoFilename)}
-                      alt="Print result"
-                      className="h-24 w-24 rounded object-cover"
+          {model.printLogs.length === 0 ? (
+            <p className="text-slate-400">No prints logged yet.</p>
+          ) : (
+            <ul className="grid gap-3">
+              {model.printLogs.map((log) =>
+                editingLogId === log.id ? (
+                  <li key={log.id}>
+                    <EditPrintLogForm
+                      modelId={model.id}
+                      log={log}
+                      onSaved={() => {
+                        setEditingLogId(null);
+                        refresh();
+                      }}
+                      onCancel={() => setEditingLogId(null)}
                     />
-                  )}
-                  <div className="flex-1">
-                    <p className={log.success ? "text-emerald-400" : "text-red-400"}>
-                      {log.success ? "Success" : "Failed"} · {new Date(log.createdAt).toLocaleDateString()}
-                    </p>
-                    {(log.printerName || log.material) && (
-                      <p className="text-sm text-slate-400">
-                        {[log.printerName, log.material].filter(Boolean).join(" · ")}
-                      </p>
+                  </li>
+                ) : (
+                  <li key={log.id} className="flex gap-4 rounded-lg border border-slate-800 bg-slate-900 p-4">
+                    {log.photoFilename && (
+                      <img
+                        src={api.printLogPhotoUrl(log.photoFilename)}
+                        alt="Print result"
+                        className="h-24 w-24 rounded object-cover"
+                      />
                     )}
-                    {log.notes && <p className="mt-1 text-sm text-slate-300">{log.notes}</p>}
-                  </div>
-                  {authenticated && (
+                    <div className="flex-1">
+                      <p className={log.success ? "text-emerald-400" : "text-red-400"}>
+                        {log.success ? "Success" : "Failed"} · {new Date(log.createdAt).toLocaleDateString()}
+                      </p>
+                      {(log.printerName || log.material) && (
+                        <p className="text-sm text-slate-400">
+                          {[log.printerName, log.material].filter(Boolean).join(" · ")}
+                        </p>
+                      )}
+                      {log.notes && <p className="mt-1 text-sm text-slate-300">{log.notes}</p>}
+                    </div>
                     <div className="flex shrink-0 gap-3 text-sm">
                       <button onClick={() => setEditingLogId(log.id)} className="text-sky-400 hover:text-sky-300">
                         Edit
@@ -215,13 +241,13 @@ export default function ModelDetail() {
                         Delete
                       </button>
                     </div>
-                  )}
-                </li>
-              ),
-            )}
-          </ul>
-        )}
-      </div>
+                  </li>
+                ),
+              )}
+            </ul>
+          )}
+        </div>
+      )}
     </div>
   );
 }

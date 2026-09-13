@@ -57,12 +57,13 @@ function toSummary(row: any): ModelSummary {
     printCount: row.print_count,
     lastPrintedAt: row.last_printed_at,
     previewFilename: row.preview_filename ?? null,
+    sourceUrl: row.source_url ?? null,
   };
 }
 
 const summaryBaseQuery = `
   SELECT
-    m.id, m.name, m.description, m.created_at, m.category_id, m.preview_filename,
+    m.id, m.name, m.description, m.created_at, m.category_id, m.preview_filename, m.source_url,
     c.name AS category_name,
     (SELECT COUNT(*) FROM model_files mf WHERE mf.model_id = m.id) AS file_count,
     (SELECT mf.file_type FROM model_files mf WHERE mf.model_id = m.id
@@ -118,23 +119,29 @@ export function getModelDetail(id: number): ModelDetail | null {
   return { ...toSummary(row), files, printLogs };
 }
 
-export function createModel(input: { name: string; description?: string | null; categoryId?: number | null }): number {
+export function createModel(input: {
+  name: string;
+  description?: string | null;
+  categoryId?: number | null;
+  sourceUrl?: string | null;
+}): number {
   const result = db
-    .prepare(`INSERT INTO models (name, description, category_id) VALUES (?, ?, ?)`)
-    .run(input.name, input.description ?? null, input.categoryId ?? null);
+    .prepare(`INSERT INTO models (name, description, category_id, source_url) VALUES (?, ?, ?, ?)`)
+    .run(input.name, input.description ?? null, input.categoryId ?? null, input.sourceUrl ?? null);
   return Number(result.lastInsertRowid);
 }
 
 export function updateModel(
   id: number,
-  input: { name?: string; description?: string | null; categoryId?: number | null },
+  input: { name?: string; description?: string | null; categoryId?: number | null; sourceUrl?: string | null },
 ): void {
   const current = db.prepare(`SELECT * FROM models WHERE id = ?`).get(id) as any;
   if (!current) throw new Error("Model not found");
-  db.prepare(`UPDATE models SET name = ?, description = ?, category_id = ? WHERE id = ?`).run(
+  db.prepare(`UPDATE models SET name = ?, description = ?, category_id = ?, source_url = ? WHERE id = ?`).run(
     input.name ?? current.name,
     input.description !== undefined ? input.description : current.description,
     input.categoryId !== undefined ? input.categoryId : current.category_id,
+    input.sourceUrl !== undefined ? input.sourceUrl : current.source_url,
     id,
   );
 }
