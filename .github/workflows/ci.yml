@@ -22,17 +22,31 @@ jobs:
         run: npm run build
 
       - name: Test with coverage
-        run: npm run test:coverage 2>&1 | tee coverage-output.txt
-
-      - name: Coverage summary
-        if: always()
         run: |
-          {
-            echo '## Test results & coverage'
-            echo '```'
-            cat coverage-output.txt
-            echo '```'
-          } >> "$GITHUB_STEP_SUMMARY"
+          set +e
+          overall=0
+          echo '## Test results & coverage' >> "$GITHUB_STEP_SUMMARY"
+          for pkg in shared api web; do
+            name="@printlib/$pkg"
+            npm run test:coverage -w "$name" > "$pkg-output.raw.txt" 2>&1
+            status=$?
+            [ "$status" -ne 0 ] && overall=1
+            sed -r "s/\x1b\[[0-9;]*[a-zA-Z]//g" "$pkg-output.raw.txt" > "$pkg-output.txt"
+            {
+              echo ""
+              if [ "$status" -eq 0 ]; then
+                echo "<details><summary>✅ $name</summary>"
+              else
+                echo "<details open><summary>❌ $name</summary>"
+              fi
+              echo ""
+              echo '```'
+              cat "$pkg-output.txt"
+              echo '```'
+              echo "</details>"
+            } >> "$GITHUB_STEP_SUMMARY"
+          done
+          exit $overall
 
       - name: Upload coverage reports
         if: always()
