@@ -1,10 +1,8 @@
 import crypto from "node:crypto";
 
-// Whole-app session auth, same shape as this user's other personal
-// internet-facing apps (mirage, pix): a single shared password, a signed
-// timed cookie, no user accounts. Unlike those apps (which are public with
-// an admin-only gate), PrintLib has no public part — everything requires a
-// session.
+// Single shared password, no user accounts — a signed, timed session
+// cookie gates writes only (see app.ts); browsing/search/view/download
+// stay public.
 export const SESSION_COOKIE = "printlib_session";
 export const SESSION_MAX_AGE_SECONDS = 60 * 60 * 24 * 14; // 14 days
 

@@ -1,6 +1,6 @@
-# Standalone local run/dev. Production deploy is via ~/dev/home_nginx's
-# docker-compose.yml, which builds this same Dockerfile as service
-# "printlib" on the shared home_default network (see that repo).
+# Standalone local run/dev. For production, run this same Dockerfile as a
+# service in your own reverse-proxy stack (see README.md) instead of
+# publishing port 8000 directly.
 services:
   printlib:
     build: .
