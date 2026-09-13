@@ -6,6 +6,7 @@ import UploadDropzone from "../components/UploadDropzone";
 import CategoryManager from "../components/CategoryManager";
 import SiteLinksPanel from "../components/SiteLinksPanel";
 import StarRating from "../components/StarRating";
+import Lightbox from "../components/Lightbox";
 import { useAuth } from "../auth/AuthContext";
 
 export default function Library() {
@@ -15,6 +16,7 @@ export default function Library() {
   const [search, setSearch] = useState("");
   const [categoryId, setCategoryId] = useState<string>("");
   const [loading, setLoading] = useState(true);
+  const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
 
   async function refresh() {
     setLoading(true);
@@ -78,7 +80,11 @@ export default function Library() {
                 <img
                   src={api.previewUrl(model.previewFilename)}
                   alt={model.name}
-                  className="mb-2 aspect-square w-full rounded bg-slate-800 object-contain"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setLightboxSrc(api.previewUrl(model.previewFilename!));
+                  }}
+                  className="mb-2 aspect-square w-full cursor-zoom-in rounded bg-slate-800 object-contain"
                 />
               ) : (
                 <div className="mb-2 flex aspect-square w-full items-center justify-center rounded bg-slate-800 text-3xl">
@@ -109,6 +115,8 @@ export default function Library() {
           ))}
         </div>
       )}
+
+      <Lightbox src={lightboxSrc} onClose={() => setLightboxSrc(null)} />
     </div>
   );
 }

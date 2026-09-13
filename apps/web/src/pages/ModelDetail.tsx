@@ -6,6 +6,7 @@ import Viewer3D from "../components/Viewer3D";
 import TagEditor from "../components/TagEditor";
 import PrintLogForm, { EditPrintLogForm } from "../components/PrintLogForm";
 import StarRating from "../components/StarRating";
+import Lightbox from "../components/Lightbox";
 import { useAuth } from "../auth/AuthContext";
 
 export default function ModelDetail() {
@@ -14,6 +15,7 @@ export default function ModelDetail() {
   const { authenticated } = useAuth();
   const [model, setModel] = useState<ModelDetailType | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -230,7 +232,8 @@ export default function ModelDetail() {
                         <img
                           src={api.printLogPhotoUrl(log.photoFilename)}
                           alt="Print result"
-                          className="h-24 w-24 rounded object-cover"
+                          onClick={() => setLightboxSrc(api.printLogPhotoUrl(log.photoFilename!))}
+                          className="h-24 w-24 cursor-zoom-in rounded object-cover"
                         />
                         <button
                           onClick={() => api.setPreviewFromLog(model.id, log.id).then(refresh)}
@@ -266,6 +269,8 @@ export default function ModelDetail() {
           )}
         </div>
       )}
+
+      <Lightbox src={lightboxSrc} onClose={() => setLightboxSrc(null)} />
     </div>
   );
 }
