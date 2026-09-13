@@ -1,0 +1,111 @@
+/* Color themes. `slate` and `sky` (the only palettes the app uses for
+   surfaces/text/accent) are re-pointed at these variables in
+   tailwind.config.js, so switching `data-theme` on <html> re-themes the
+   whole app without touching any component. "slate" below matches
+   Tailwind's actual default slate/sky values exactly, so it's a no-op
+   theme — nothing changes for anyone who never opens the theme picker. */
+
+:root,
+:root[data-theme="slate"] {
+  --slate-50: #f8fafc;
+  --slate-100: #f1f5f9;
+  --slate-200: #e2e8f0;
+  --slate-300: #cbd5e1;
+  --slate-400: #94a3b8;
+  --slate-500: #64748b;
+  --slate-600: #475569;
+  --slate-700: #334155;
+  --slate-800: #1e293b;
+  --slate-900: #0f172a;
+  --slate-950: #020617;
+
+  --sky-50: #f0f9ff;
+  --sky-100: #e0f2fe;
+  --sky-200: #bae6fd;
+  --sky-300: #7dd3fc;
+  --sky-400: #38bdf8;
+  --sky-500: #0ea5e9;
+  --sky-600: #0284c7;
+  --sky-700: #0369a1;
+  --sky-800: #075985;
+  --sky-900: #0c4a6e;
+  --sky-950: #082f49;
+}
+
+:root[data-theme="forest"] {
+  --slate-50: #f2faf6;
+  --slate-100: #e2f2e9;
+  --slate-200: #c8e3d3;
+  --slate-300: #9ccbae;
+  --slate-400: #6bb08c;
+  --slate-500: #418a66;
+  --slate-600: #2b6b4c;
+  --slate-700: #1c4f38;
+  --slate-800: #123626;
+  --slate-900: #0a2419;
+  --slate-950: #051710;
+
+  --sky-50: #f0fdf4;
+  --sky-100: #dcfce7;
+  --sky-200: #bbf7d0;
+  --sky-300: #86efac;
+  --sky-400: #4ade80;
+  --sky-500: #22c55e;
+  --sky-600: #16a34a;
+  --sky-700: #15803d;
+  --sky-800: #166534;
+  --sky-900: #14532d;
+  --sky-950: #052e16;
+}
+
+:root[data-theme="sunset"] {
+  --slate-50: #faf3e6;
+  --slate-100: #f5e5cd;
+  --slate-200: #ecd0ac;
+  --slate-300: #dbb082;
+  --slate-400: #c88f57;
+  --slate-500: #a06a37;
+  --slate-600: #7d4f28;
+  --slate-700: #5c3a1f;
+  --slate-800: #402616;
+  --slate-900: #2b1a0e;
+  --slate-950: #1a0f08;
+
+  --sky-50: #fffbeb;
+  --sky-100: #fef3c7;
+  --sky-200: #fde68a;
+  --sky-300: #fcd34d;
+  --sky-400: #fbbf24;
+  --sky-500: #f59e0b;
+  --sky-600: #d97706;
+  --sky-700: #b45309;
+  --sky-800: #92400e;
+  --sky-900: #78350f;
+  --sky-950: #451a03;
+}
+
+:root[data-theme="midnight"] {
+  --slate-50: #f4f2fb;
+  --slate-100: #e7e2f6;
+  --slate-200: #d3caee;
+  --slate-300: #b3a6e2;
+  --slate-400: #8f7fd1;
+  --slate-500: #6558b5;
+  --slate-600: #4c4090;
+  --slate-700: #372f6b;
+  --slate-800: #241f4a;
+  --slate-900: #171432;
+  --slate-950: #0c0a1f;
+
+  --sky-50: #f5f3ff;
+  --sky-100: #ede9fe;
+  --sky-200: #ddd6fe;
+  --sky-300: #c4b5fd;
+  --sky-400: #a78bfa;
+  --sky-500: #8b5cf6;
+  --sky-600: #7c3aed;
+  --sky-700: #6d28d9;
+  --sky-800: #5b21b6;
+  --sky-900: #4c1d95;
+  --sky-950: #2e1065;
+}

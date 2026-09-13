@@ -9,16 +9,37 @@ import StarRating from "../components/StarRating";
 import Lightbox from "../components/Lightbox";
 import { useAuth } from "../auth/AuthContext";
 
+type SortBy = "date-desc" | "date-asc" | "name";
+const SORT_STORAGE_KEY = "printlib-sort";
+
+function readStoredSort(): SortBy {
+  try {
+    const stored = localStorage.getItem(SORT_STORAGE_KEY);
+    if (stored === "date-desc" || stored === "date-asc" || stored === "name") return stored;
+  } catch {
+    // localStorage unavailable — fall back silently
+  }
+  return "date-desc";
+}
+
 export default function Library() {
   const { authenticated } = useAuth();
   const [models, setModels] = useState<ModelSummary[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [search, setSearch] = useState("");
   const [categoryId, setCategoryId] = useState<string>("");
-  const [sortBy, setSortBy] = useState<"date-desc" | "date-asc" | "name">("date-desc");
+  const [sortBy, setSortBy] = useState<SortBy>(readStoredSort);
   const [minRating, setMinRating] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(SORT_STORAGE_KEY, sortBy);
+    } catch {
+      // ignore — sort still applies this session, just won't persist
+    }
+  }, [sortBy]);
 
   async function refresh() {
     setLoading(true);
