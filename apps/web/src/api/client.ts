@@ -9,6 +9,22 @@ async function json<T>(res: Response): Promise<T> {
 }
 
 export const api = {
+  getSession() {
+    return fetch(`/api/session`).then((r) => json<{ authenticated: boolean }>(r));
+  },
+
+  login(password: string) {
+    return fetch(`/api/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ password }),
+    }).then((r) => json<{ ok: true }>(r));
+  },
+
+  logout() {
+    return fetch(`/api/logout`, { method: "POST" }).then((r) => json<{ ok: true }>(r));
+  },
+
   listModels(params: { search?: string; categoryId?: number; tagId?: number } = {}) {
     const qs = new URLSearchParams();
     if (params.search) qs.set("search", params.search);
