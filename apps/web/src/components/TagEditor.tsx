@@ -4,9 +4,11 @@ import type { Tag } from "@printlib/shared";
 export default function TagEditor({
   tags,
   onChange,
+  readOnly,
 }: {
   tags: Tag[];
   onChange: (names: string[]) => void;
+  readOnly?: boolean;
 }) {
   const [draft, setDraft] = useState("");
 
@@ -22,6 +24,19 @@ export default function TagEditor({
 
   function remove(name: string) {
     onChange(tags.filter((t) => t.name !== name).map((t) => t.name));
+  }
+
+  if (readOnly) {
+    if (tags.length === 0) return null;
+    return (
+      <div className="flex flex-wrap items-center gap-2">
+        {tags.map((tag) => (
+          <span key={tag.id} className="rounded-full bg-slate-800 px-3 py-1 text-sm">
+            {tag.name}
+          </span>
+        ))}
+      </div>
+    );
   }
 
   return (

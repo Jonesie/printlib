@@ -1,7 +1,11 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { api } from "../api/client";
+import { useAuth } from "../auth/AuthContext";
 
-export default function Login({ onLoggedIn }: { onLoggedIn: () => void }) {
+export default function Login() {
+  const navigate = useNavigate();
+  const { refresh } = useAuth();
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -12,7 +16,8 @@ export default function Login({ onLoggedIn }: { onLoggedIn: () => void }) {
     setError(null);
     try {
       await api.login(password);
-      onLoggedIn();
+      await refresh();
+      navigate("/");
     } catch (e) {
       setError(e instanceof Error ? e.message : "Login failed");
     } finally {
@@ -21,9 +26,9 @@ export default function Login({ onLoggedIn }: { onLoggedIn: () => void }) {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center">
+    <div className="flex min-h-[70vh] items-center justify-center">
       <form onSubmit={submit} className="grid w-72 gap-3">
-        <h1 className="text-center text-lg font-semibold text-sky-400">PrintLib</h1>
+        <h1 className="text-center text-lg font-semibold text-sky-400">Log in</h1>
         <input
           type="password"
           autoFocus

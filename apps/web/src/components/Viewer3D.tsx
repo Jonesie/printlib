@@ -30,10 +30,12 @@ export default function Viewer3D({
   stlUrl,
   modelId,
   onPreviewSaved,
+  editable = true,
 }: {
   stlUrl: string;
   modelId: number;
   onPreviewSaved?: () => void;
+  editable?: boolean;
 }) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [saving, setSaving] = useState(false);
@@ -78,16 +80,18 @@ export default function Viewer3D({
           <OrbitControls makeDefault />
         </Canvas>
       </div>
-      <div className="flex items-center gap-2">
-        <button
-          onClick={savePreview}
-          disabled={saving}
-          className="self-start rounded-md border border-slate-700 px-3 py-1.5 text-sm hover:bg-slate-800 disabled:opacity-50"
-        >
-          {saving ? "Saving…" : "Save this angle as preview"}
-        </button>
-        {saved && <span className="text-sm text-emerald-400">Saved</span>}
-      </div>
+      {editable && (
+        <div className="flex items-center gap-2">
+          <button
+            onClick={savePreview}
+            disabled={saving}
+            className="self-start rounded-md border border-slate-700 px-3 py-1.5 text-sm hover:bg-slate-800 disabled:opacity-50"
+          >
+            {saving ? "Saving…" : "Save this angle as preview"}
+          </button>
+          {saved && <span className="text-sm text-emerald-400">Saved</span>}
+        </div>
+      )}
     </div>
   );
 }

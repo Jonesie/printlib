@@ -4,8 +4,10 @@ import type { Category, ModelSummary } from "@printlib/shared";
 import { api } from "../api/client";
 import UploadDropzone from "../components/UploadDropzone";
 import CategoryManager from "../components/CategoryManager";
+import { useAuth } from "../auth/AuthContext";
 
 export default function Library() {
+  const { authenticated } = useAuth();
   const [models, setModels] = useState<ModelSummary[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [search, setSearch] = useState("");
@@ -51,10 +53,10 @@ export default function Library() {
             ))}
           </select>
         </div>
-        <UploadDropzone categories={categories} onUploaded={refresh} />
+        {authenticated && <UploadDropzone categories={categories} onUploaded={refresh} />}
       </div>
 
-      <CategoryManager categories={categories} onChanged={refresh} />
+      {authenticated && <CategoryManager categories={categories} onChanged={refresh} />}
 
       {loading ? (
         <p className="text-slate-400">Loading…</p>

@@ -14,11 +14,12 @@ import tagsRoutes from "./routes/tags.js";
 import printLogsRoutes from "./routes/printLogs.js";
 import filesRoutes from "./routes/files.js";
 
-// Every /api/* route requires a valid session except these — logging in
-// obviously can't require being already logged in, and the frontend needs
-// to be able to ask "am I logged in?" before it knows whether to render
-// the login form or the app.
-const PUBLIC_API_ROUTES = new Set(["/api/login", "/api/session"]);
+// Reading is public (browse/search/view/download/preview) — only writes
+// (uploading, editing, deleting, logging prints) require a session. Login
+// and logout are exempt from the write check for the obvious reason: you
+// can't already be logged in to log in, and logging out while already
+// logged out should just no-op rather than 401.
+const PUBLIC_WRITE_ROUTES = new Set(["/api/login", "/api/logout"]);
 
 export function buildApp() {
   const app = Fastify({ logger: true });
@@ -32,7 +33,8 @@ export function buildApp() {
 
   app.addHook("onRequest", async (request, reply) => {
     const path = request.url.split("?")[0];
-    if (!path.startsWith("/api/") || PUBLIC_API_ROUTES.has(path)) return;
+    if (!path.startsWith("/api/")) return;
+    if (request.method === "GET" || PUBLIC_WRITE_ROUTES.has(path)) return;
     if (!isValidSessionToken(request.cookies[SESSION_COOKIE])) {
       return reply.code(401).send({ error: "Not authenticated" });
     }
