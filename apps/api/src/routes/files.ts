@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import AdmZip from "adm-zip";
 import type { FastifyInstance } from "fastify";
-import { getModelDetail, getModelFile } from "../db/queries.js";
+import { deleteModelFile, getModelDetail, getModelFile } from "../db/queries.js";
 import { PREVIEWS_DIR, PRINT_LOGS_DIR } from "../config.js";
 
 export default async function filesRoutes(app: FastifyInstance) {
@@ -14,6 +14,22 @@ export default async function filesRoutes(app: FastifyInstance) {
     }
     reply.header("Content-Disposition", `attachment; filename="${encodeURIComponent(file.filename)}"`);
     return reply.send(fs.createReadStream(file.storedPath));
+  });
+
+  app.delete("/api/files/:id", async (request, reply) => {
+    const id = Number((request.params as { id: string }).id);
+    const file = getModelFile(id);
+    if (!file) return reply.code(404).send({ error: "File not found" });
+
+    const model = getModelDetail(file.modelId);
+    if (!model) return reply.code(404).send({ error: "Model not found" });
+    if (model.files.length <= 1 && !model.sourceUrl) {
+      return reply.code(400).send({ error: "a model needs at least a source URL or files" });
+    }
+
+    deleteModelFile(id);
+    if (fs.existsSync(file.storedPath)) fs.unlinkSync(file.storedPath);
+    return getModelDetail(file.modelId);
   });
 
   app.get("/api/models/:id/download", async (request, reply) => {

@@ -143,6 +143,10 @@ export const api = {
     return `/api/files/${fileId}/download`;
   },
 
+  deleteFile(fileId: number) {
+    return fetch(`/api/files/${fileId}`, { method: "DELETE" }).then((r) => json<ModelDetail>(r));
+  },
+
   modelDownloadUrl(modelId: number) {
     return `/api/models/${modelId}/download`;
   },

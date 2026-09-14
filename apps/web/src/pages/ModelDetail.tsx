@@ -91,6 +91,16 @@ export default function ModelDetail() {
     setModel(updated);
   }
 
+  async function removeFile(file: { id: number; filename: string }) {
+    if (!confirm(`Remove "${file.filename}"?`)) return;
+    try {
+      const updated = await api.deleteFile(file.id);
+      setModel(updated);
+    } catch (e) {
+      alert(e instanceof Error ? e.message : "Failed to remove file");
+    }
+  }
+
   return (
     <div className="mx-auto grid max-w-6xl gap-6">
       <Link to="/" className="text-sm text-slate-400 hover:text-slate-200">
@@ -244,9 +254,16 @@ export default function ModelDetail() {
                     <span>
                       {file.filename} <span className="text-slate-500">({file.fileType})</span>
                     </span>
-                    <a href={api.fileDownloadUrl(file.id)} className="text-sky-400 hover:text-sky-300">
-                      Download
-                    </a>
+                    <span className="flex items-center gap-3">
+                      <a href={api.fileDownloadUrl(file.id)} className="text-sky-400 hover:text-sky-300">
+                        Download
+                      </a>
+                      {authenticated && (
+                        <button onClick={() => removeFile(file)} className="text-red-400 hover:text-red-300">
+                          Remove
+                        </button>
+                      )}
+                    </span>
                   </li>
                 ))}
               </ul>

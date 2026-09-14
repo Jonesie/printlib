@@ -213,6 +213,10 @@ export function getModelFile(id: number): (ModelFile & { storedPath: string }) |
   return { ...rowToModelFile(row), storedPath: row.stored_path };
 }
 
+export function deleteModelFile(id: number): void {
+  db.prepare(`DELETE FROM model_files WHERE id = ?`).run(id);
+}
+
 export function listCategories(): Category[] {
   return db.prepare(`SELECT * FROM categories ORDER BY name`).all().map(rowToCategory);
 }
