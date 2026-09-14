@@ -226,8 +226,17 @@ export default function ModelDetail() {
 
           {model.files.length > 0 && (
             <details open={model.files.length <= 5}>
-              <summary className="mb-1 cursor-pointer font-medium text-slate-200">
-                Files ({model.files.length})
+              <summary className="mb-1 flex cursor-pointer items-center justify-between font-medium text-slate-200">
+                <span>Files ({model.files.length})</span>
+                {model.files.length > 1 && (
+                  <a
+                    href={api.modelDownloadUrl(model.id)}
+                    onClick={(e) => e.stopPropagation()}
+                    className="text-sm font-normal text-sky-400 hover:text-sky-300"
+                  >
+                    Download all (.zip)
+                  </a>
+                )}
               </summary>
               <ul className="grid grid-cols-1 gap-1">
                 {model.files.map((file) => (

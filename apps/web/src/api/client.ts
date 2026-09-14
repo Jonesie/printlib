@@ -143,6 +143,10 @@ export const api = {
     return `/api/files/${fileId}/download`;
   },
 
+  modelDownloadUrl(modelId: number) {
+    return `/api/models/${modelId}/download`;
+  },
+
   printLogPhotoUrl(filename: string) {
     return `/api/print-log-photos/${filename}`;
   },

@@ -1,7 +1,8 @@
 import fs from "node:fs";
 import path from "node:path";
+import AdmZip from "adm-zip";
 import type { FastifyInstance } from "fastify";
-import { getModelFile } from "../db/queries.js";
+import { getModelDetail, getModelFile } from "../db/queries.js";
 import { PREVIEWS_DIR, PRINT_LOGS_DIR } from "../config.js";
 
 export default async function filesRoutes(app: FastifyInstance) {
@@ -13,6 +14,26 @@ export default async function filesRoutes(app: FastifyInstance) {
     }
     reply.header("Content-Disposition", `attachment; filename="${encodeURIComponent(file.filename)}"`);
     return reply.send(fs.createReadStream(file.storedPath));
+  });
+
+  app.get("/api/models/:id/download", async (request, reply) => {
+    const id = Number((request.params as { id: string }).id);
+    const model = getModelDetail(id);
+    if (!model) return reply.code(404).send({ error: "Model not found" });
+    if (model.files.length === 0) return reply.code(404).send({ error: "This model has no files" });
+
+    const zip = new AdmZip();
+    for (const file of model.files) {
+      const stored = getModelFile(file.id);
+      if (stored && fs.existsSync(stored.storedPath)) {
+        zip.addLocalFile(stored.storedPath, "", file.filename);
+      }
+    }
+
+    const safeName = model.name.replace(/[^a-z0-9_\- ]/gi, "_").trim() || "model";
+    reply.header("Content-Type", "application/zip");
+    reply.header("Content-Disposition", `attachment; filename="${encodeURIComponent(safeName)}.zip"`);
+    return reply.send(zip.toBuffer());
   });
 
   app.get("/api/print-log-photos/:filename", async (request, reply) => {
