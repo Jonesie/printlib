@@ -20,6 +20,12 @@ describe("public reads", () => {
     expect(res.statusCode).toBe(200);
     expect(res.json()).toEqual({ authenticated: false });
   });
+
+  it("GET /api/version is public and returns the version status shape", async () => {
+    const res = await app.inject({ method: "GET", url: "/api/version" });
+    expect(res.statusCode).toBe(200);
+    expect(res.json()).toMatchObject({ current: expect.any(String), updateAvailable: expect.any(Boolean) });
+  });
 });
 
 describe("write gating", () => {

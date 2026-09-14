@@ -32,6 +32,9 @@ a login.
   only a name is required
 - Four color themes, remembered per browser
 - Installable as a PWA
+- Checks GitHub for a newer release on startup and once a day; if one exists,
+  a link appears next to the version number in the footer (skipped entirely
+  for from-source builds, which have no release version to compare against)
 - Single shared login (no user accounts) gates uploads/edits/deletes; viewing
   the library, searching, and downloading stays open to anyone who can reach
   the site — the login just isn't linked from anywhere, you go to `/login`

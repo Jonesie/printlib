@@ -112,3 +112,11 @@ export const modelDetailSchema = modelSummarySchema.extend({
   printLogs: z.array(printLogSchema),
 });
 export type ModelDetail = z.infer<typeof modelDetailSchema>;
+
+export const versionStatusSchema = z.object({
+  current: z.string(),
+  latest: z.string().nullable(),
+  updateAvailable: z.boolean(),
+  releaseUrl: z.string().nullable(),
+});
+export type VersionStatus = z.infer<typeof versionStatusSchema>;

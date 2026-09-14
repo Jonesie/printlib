@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Link, Route, Routes } from "react-router-dom";
 import Library from "./pages/Library";
 import ModelDetail from "./pages/ModelDetail";
@@ -31,6 +32,15 @@ function Header() {
 }
 
 function Footer() {
+  const [releaseUrl, setReleaseUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    api
+      .getVersionStatus()
+      .then((status) => setReleaseUrl(status.updateAvailable ? status.releaseUrl : null))
+      .catch(() => {});
+  }, []);
+
   return (
     <footer className="mt-auto flex justify-center gap-4 border-t border-slate-800 px-4 py-4 text-sm text-slate-500">
       <a
@@ -49,7 +59,23 @@ function Footer() {
       >
         Buy me a coffee ☕
       </a>
-      <span>v{__APP_VERSION__}</span>
+      <span>
+        v{__APP_VERSION__}
+        {releaseUrl && (
+          <>
+            {" "}
+            &middot;{" "}
+            <a
+              href={releaseUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sky-400 hover:text-sky-300"
+            >
+              update available
+            </a>
+          </>
+        )}
+      </span>
     </footer>
   );
 }

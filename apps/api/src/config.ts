@@ -11,5 +11,8 @@ export const DB_PATH = path.join(DATA_DIR, "printlib.sqlite");
 export const PORT = Number(process.env.PORT ?? 8000);
 export const HOST = process.env.HOST ?? "0.0.0.0";
 
+// "dev" for local/from-source builds; the release image bakes in the git tag.
+export const APP_VERSION = process.env.APP_VERSION ?? "dev";
+
 // Set when the frontend build should be served by this process (production).
 export const WEB_DIST_DIR = process.env.WEB_DIST_DIR ?? null;

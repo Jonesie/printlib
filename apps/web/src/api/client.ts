@@ -1,4 +1,13 @@
-import type { Category, ModelDetail, ModelSummary, Printer, Profile, SiteLink, Tag } from "@printlib/shared";
+import type {
+  Category,
+  ModelDetail,
+  ModelSummary,
+  Printer,
+  Profile,
+  SiteLink,
+  Tag,
+  VersionStatus,
+} from "@printlib/shared";
 
 async function json<T>(res: Response): Promise<T> {
   if (!res.ok) {
@@ -11,6 +20,10 @@ async function json<T>(res: Response): Promise<T> {
 export const api = {
   getSession() {
     return fetch(`/api/session`).then((r) => json<{ authenticated: boolean }>(r));
+  },
+
+  getVersionStatus() {
+    return fetch(`/api/version`).then((r) => json<VersionStatus>(r));
   },
 
   login(password: string) {
