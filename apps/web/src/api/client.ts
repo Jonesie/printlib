@@ -61,6 +61,7 @@ export const api = {
       description?: string | null;
       categoryId?: number | null;
       sourceUrl?: string | null;
+      sourceSiteName?: string | null;
       rating?: number | null;
       tags?: string[];
     },

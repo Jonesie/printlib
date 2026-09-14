@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import type { Category, ModelDetail as ModelDetailType } from "@printlib/shared";
+import { detectSourceSiteName } from "@printlib/shared";
 import { api } from "../api/client";
 import Viewer3D from "../components/Viewer3D";
 import TagEditor from "../components/TagEditor";
 import PrintLogForm, { EditPrintLogForm } from "../components/PrintLogForm";
 import StarRating from "../components/StarRating";
 import Lightbox from "../components/Lightbox";
+import SourcePill from "../components/SourcePill";
 import { useAuth } from "../auth/AuthContext";
 
 export default function ModelDetail() {
@@ -21,7 +23,9 @@ export default function ModelDetail() {
   const [description, setDescription] = useState("");
   const [categoryId, setCategoryId] = useState<string>("");
   const [sourceUrl, setSourceUrl] = useState("");
+  const [sourceSiteName, setSourceSiteName] = useState("");
   const [savingModel, setSavingModel] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const [editingLogId, setEditingLogId] = useState<number | null>(null);
 
   async function refresh() {
@@ -31,6 +35,7 @@ export default function ModelDetail() {
     setDescription(m.description ?? "");
     setCategoryId(m.category ? String(m.category.id) : "");
     setSourceUrl(m.sourceUrl ?? "");
+    setSourceSiteName(m.sourceSiteName ?? "");
   }
 
   useEffect(() => {
@@ -49,16 +54,32 @@ export default function ModelDetail() {
     navigate("/");
   }
 
+  const trimmedSourceUrl = sourceUrl.trim();
+  const detectedSiteName = trimmedSourceUrl ? detectSourceSiteName(trimmedSourceUrl) : null;
+  const needsManualSiteName = Boolean(trimmedSourceUrl) && !detectedSiteName;
+
   async function saveModelFields() {
+    if (!trimmedSourceUrl && model!.files.length === 0) {
+      setSaveError("A model needs at least a source URL or files.");
+      return;
+    }
+    if (needsManualSiteName && !sourceSiteName.trim()) {
+      setSaveError("This source URL isn't from a site we recognize — please name the site it's from.");
+      return;
+    }
+    setSaveError(null);
     setSavingModel(true);
     try {
       await api.updateModel(model!.id, {
         name,
         description: description.trim() ? description : null,
         categoryId: categoryId ? Number(categoryId) : null,
-        sourceUrl: sourceUrl.trim() ? sourceUrl.trim() : null,
+        sourceUrl: trimmedSourceUrl ? trimmedSourceUrl : null,
+        sourceSiteName: trimmedSourceUrl ? (detectedSiteName ?? sourceSiteName.trim()) : null,
       });
       refresh();
+    } catch (e) {
+      setSaveError(e instanceof Error ? e.message : "Save failed");
     } finally {
       setSavingModel(false);
     }
@@ -106,6 +127,8 @@ export default function ModelDetail() {
                 </button>
               </div>
 
+              <SourcePill sourceUrl={model.sourceUrl} sourceSiteName={model.sourceSiteName} />
+
               <StarRating
                 rating={model.rating}
                 onChange={async (rating) => {
@@ -136,10 +159,27 @@ export default function ModelDetail() {
 
               <input
                 className="rounded bg-slate-800 px-3 py-2"
-                placeholder="Source URL (optional) — e.g. the Printables/Thingiverse page"
+                placeholder="Source URL (optional, unless there are no files) — e.g. the Printables/Thingiverse page"
                 value={sourceUrl}
                 onChange={(e) => setSourceUrl(e.target.value)}
               />
+              {trimmedSourceUrl && (
+                <p className="-mt-2 text-xs text-slate-500">
+                  {detectedSiteName
+                    ? `Recognized as ${detectedSiteName}.`
+                    : "Site not recognized — name it below so visitors know where this came from."}
+                </p>
+              )}
+              {needsManualSiteName && (
+                <input
+                  className="rounded bg-slate-800 px-3 py-2"
+                  placeholder="Site name (e.g. Printables, MakerWorld)"
+                  value={sourceSiteName}
+                  onChange={(e) => setSourceSiteName(e.target.value)}
+                />
+              )}
+
+              {saveError && <p className="text-sm text-red-400">{saveError}</p>}
 
               <button
                 onClick={saveModelFields}
@@ -159,7 +199,10 @@ export default function ModelDetail() {
             </>
           ) : (
             <>
-              <h1 className="text-xl font-semibold">{model.name}</h1>
+              <div className="flex items-center gap-3">
+                <h1 className="text-xl font-semibold">{model.name}</h1>
+                <SourcePill sourceUrl={model.sourceUrl} sourceSiteName={model.sourceSiteName} />
+              </div>
               <StarRating rating={model.rating} />
               {model.description && <p className="text-slate-300">{model.description}</p>}
               <p className="text-sm text-slate-400">Category: {model.category?.name ?? "Uncategorized"}</p>
@@ -167,7 +210,21 @@ export default function ModelDetail() {
             </>
           )}
 
-          {authenticated ? (
+          {model.sourceUrl && (
+            <div>
+              <h2 className="mb-1 font-medium text-slate-200">Source</h2>
+              <a
+                href={model.sourceUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="break-all text-sm text-sky-400 hover:text-sky-300"
+              >
+                {model.sourceUrl}
+              </a>
+            </div>
+          )}
+
+          {model.files.length > 0 && (
             <details open={model.files.length <= 5}>
               <summary className="mb-1 cursor-pointer font-medium text-slate-200">
                 Files ({model.files.length})
@@ -185,20 +242,6 @@ export default function ModelDetail() {
                 ))}
               </ul>
             </details>
-          ) : (
-            model.sourceUrl && (
-              <div>
-                <h2 className="mb-1 font-medium text-slate-200">Source</h2>
-                <a
-                  href={model.sourceUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="break-all text-sm text-sky-400 hover:text-sky-300"
-                >
-                  {model.sourceUrl}
-                </a>
-              </div>
-            )
           )}
         </div>
       </div>

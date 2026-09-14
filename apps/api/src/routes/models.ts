@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import crypto from "node:crypto";
 import type { FastifyInstance } from "fastify";
+import { detectSourceSiteName } from "@printlib/shared";
 import {
   createModel,
   deleteModel,
@@ -45,14 +46,16 @@ export default async function modelsRoutes(app: FastifyInstance) {
     return model;
   });
 
-  // multipart/form-data: name, description?, categoryId?, sourceUrl?, tags? (comma-separated),
-  // file (one or more parts named "file" — a zip, or several single files)
+  // multipart/form-data: name, description?, categoryId?, sourceUrl?, sourceSiteName?,
+  // tags? (comma-separated), file (zero or more parts named "file" — a zip, or several
+  // single files; at least one file OR a sourceUrl is required)
   app.post("/api/models", async (request, reply) => {
     const parts = request.parts();
     let name: string | undefined;
     let description: string | undefined;
     let categoryId: number | undefined;
     let sourceUrl: string | undefined;
+    let sourceSiteName: string | undefined;
     let tags: string[] = [];
     const fileUploads: { filename: string; buffer: Buffer }[] = [];
 
@@ -66,6 +69,7 @@ export default async function modelsRoutes(app: FastifyInstance) {
         if (part.fieldname === "description") description = String(part.value);
         if (part.fieldname === "categoryId" && part.value) categoryId = Number(part.value);
         if (part.fieldname === "sourceUrl") sourceUrl = String(part.value);
+        if (part.fieldname === "sourceSiteName") sourceSiteName = String(part.value);
         if (part.fieldname === "tags" && part.value) {
           tags = String(part.value)
             .split(",")
@@ -76,9 +80,19 @@ export default async function modelsRoutes(app: FastifyInstance) {
     }
 
     if (!name) return reply.code(400).send({ error: "name is required" });
-    if (fileUploads.length === 0) return reply.code(400).send({ error: "at least one file is required" });
+    if (fileUploads.length === 0 && !sourceUrl) {
+      return reply.code(400).send({ error: "provide at least one file or a source URL" });
+    }
 
-    const modelId = createModel({ name, description, categoryId, sourceUrl });
+    let resolvedSiteName: string | null = null;
+    if (sourceUrl) {
+      resolvedSiteName = detectSourceSiteName(sourceUrl) ?? sourceSiteName?.trim() ?? null;
+      if (!resolvedSiteName) {
+        return reply.code(400).send({ error: "sourceSiteName is required for this source URL" });
+      }
+    }
+
+    const modelId = createModel({ name, description, categoryId, sourceUrl, sourceSiteName: resolvedSiteName });
     for (const upload of fileUploads) {
       storeUpload(modelId, upload.filename, upload.buffer);
     }
@@ -94,12 +108,30 @@ export default async function modelsRoutes(app: FastifyInstance) {
       description?: string | null;
       categoryId?: number | null;
       sourceUrl?: string | null;
+      sourceSiteName?: string | null;
       rating?: number | null;
       tags?: string[];
     };
-    if (!getModelDetail(id)) return reply.code(404).send({ error: "Model not found" });
+    const model = getModelDetail(id);
+    if (!model) return reply.code(404).send({ error: "Model not found" });
     if (body.rating != null && (body.rating < 1 || body.rating > 5)) {
       return reply.code(400).send({ error: "rating must be between 1 and 5" });
+    }
+
+    const effectiveSourceUrl = body.sourceUrl !== undefined ? body.sourceUrl : model.sourceUrl;
+    if (!effectiveSourceUrl && model.fileCount === 0) {
+      return reply.code(400).send({ error: "a model needs at least a source URL or files" });
+    }
+
+    let sourceSiteName: string | null | undefined;
+    if (!effectiveSourceUrl) {
+      sourceSiteName = null;
+    } else if (body.sourceUrl !== undefined || body.sourceSiteName !== undefined) {
+      const manual = body.sourceSiteName !== undefined ? body.sourceSiteName?.trim() || null : model.sourceSiteName;
+      sourceSiteName = detectSourceSiteName(effectiveSourceUrl) ?? manual;
+      if (!sourceSiteName) {
+        return reply.code(400).send({ error: "sourceSiteName is required for this source URL" });
+      }
     }
 
     updateModel(id, {
@@ -107,6 +139,7 @@ export default async function modelsRoutes(app: FastifyInstance) {
       description: body.description,
       categoryId: body.categoryId,
       sourceUrl: body.sourceUrl,
+      sourceSiteName,
       rating: body.rating,
     });
     if (body.tags) setModelTags(id, body.tags);

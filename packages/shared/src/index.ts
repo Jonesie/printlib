@@ -103,9 +103,34 @@ export const modelSummarySchema = z.object({
   lastPrintedAt: z.string().nullable(),
   previewFilename: z.string().nullable(),
   sourceUrl: z.string().nullable(),
+  sourceSiteName: z.string().nullable(),
   rating: z.number().min(1).max(5).nullable(),
 });
 export type ModelSummary = z.infer<typeof modelSummarySchema>;
+
+// Sites recognized automatically from a source URL's hostname — kept in sync
+// with the default site_links seed data. A URL from anywhere else needs the
+// uploader to type the site name in by hand.
+export const KNOWN_SOURCE_SITES: { hostname: string; name: string }[] = [
+  { hostname: "printables.com", name: "Printables" },
+  { hostname: "makerworld.com", name: "MakerWorld" },
+  { hostname: "thingiverse.com", name: "Thingiverse" },
+  { hostname: "myminifactory.com", name: "MyMiniFactory" },
+  { hostname: "cults3d.com", name: "Cults3D" },
+  { hostname: "gridfinity.xyz", name: "Gridfinity" },
+];
+
+export function detectSourceSiteName(url: string): string | null {
+  try {
+    const hostname = new URL(url).hostname.replace(/^www\./, "").toLowerCase();
+    const match = KNOWN_SOURCE_SITES.find(
+      (site) => hostname === site.hostname || hostname.endsWith(`.${site.hostname}`),
+    );
+    return match?.name ?? null;
+  } catch {
+    return null;
+  }
+}
 
 export const modelDetailSchema = modelSummarySchema.extend({
   files: z.array(modelFileSchema),

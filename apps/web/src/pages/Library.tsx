@@ -9,6 +9,7 @@ import PrintersPanel from "../components/PrintersPanel";
 import ProfilePanel from "../components/ProfilePanel";
 import StarRating from "../components/StarRating";
 import Lightbox from "../components/Lightbox";
+import SourcePill from "../components/SourcePill";
 import { useAuth } from "../auth/AuthContext";
 
 type SortBy = "date-desc" | "date-asc" | "name";
@@ -140,21 +141,26 @@ export default function Library() {
                 to={`/models/${model.id}`}
                 className="rounded-lg border border-slate-800 bg-slate-900 p-4 hover:border-sky-600"
               >
-                {model.previewFilename ? (
-                  <img
-                    src={api.previewUrl(model.previewFilename)}
-                    alt={model.name}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      setLightboxSrc(api.previewUrl(model.previewFilename!));
-                    }}
-                    className="mb-2 aspect-square w-full cursor-zoom-in rounded bg-slate-800 object-contain"
-                  />
-                ) : (
-                  <div className="mb-2 flex aspect-square w-full items-center justify-center rounded bg-slate-800 text-3xl">
-                    🧊
+                <div className="relative mb-2">
+                  {model.previewFilename ? (
+                    <img
+                      src={api.previewUrl(model.previewFilename)}
+                      alt={model.name}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setLightboxSrc(api.previewUrl(model.previewFilename!));
+                      }}
+                      className="aspect-square w-full cursor-zoom-in rounded bg-slate-800 object-contain"
+                    />
+                  ) : (
+                    <div className="flex aspect-square w-full items-center justify-center rounded bg-slate-800 text-3xl">
+                      🧊
+                    </div>
+                  )}
+                  <div className="absolute right-1 top-1">
+                    <SourcePill sourceUrl={model.sourceUrl} sourceSiteName={model.sourceSiteName} />
                   </div>
-                )}
+                </div>
                 <h3 className="truncate font-medium">{model.name}</h3>
                 <StarRating rating={model.rating} size="text-xs" />
                 <p className="truncate text-sm text-slate-400">

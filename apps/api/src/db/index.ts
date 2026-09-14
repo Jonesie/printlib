@@ -110,6 +110,9 @@ if (!modelColumns.some((c) => c.name === "source_url")) {
 if (!modelColumns.some((c) => c.name === "rating")) {
   db.exec(`ALTER TABLE models ADD COLUMN rating INTEGER`);
 }
+if (!modelColumns.some((c) => c.name === "source_site_name")) {
+  db.exec(`ALTER TABLE models ADD COLUMN source_site_name TEXT`);
+}
 
 // Seed a starter set of popular model sites, once, only when the table is
 // being created for the first time — so deleting them all later doesn't
