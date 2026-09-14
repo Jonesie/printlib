@@ -3,6 +3,28 @@ import type { SiteLink } from "@printlib/shared";
 import { api } from "../api/client";
 import { useAuth } from "../auth/AuthContext";
 
+function SiteFavicon({ url }: { url: string }) {
+  const [failed, setFailed] = useState(false);
+  let hostname: string | null = null;
+  try {
+    hostname = new URL(url).hostname;
+  } catch {
+    hostname = null;
+  }
+
+  if (!hostname || failed) {
+    return <span className="flex h-4 w-4 shrink-0 items-center justify-center text-xs">🔗</span>;
+  }
+  return (
+    <img
+      src={`https://www.google.com/s2/favicons?domain=${encodeURIComponent(hostname)}&sz=32`}
+      alt=""
+      className="h-4 w-4 shrink-0 rounded-sm"
+      onError={() => setFailed(true)}
+    />
+  );
+}
+
 function EditableRow({ link, onChanged }: { link: SiteLink; onChanged: () => void }) {
   const [name, setName] = useState(link.name);
   const [url, setUrl] = useState(link.url);
@@ -99,16 +121,17 @@ export default function SiteLinksPanel() {
           </div>
         </div>
       ) : (
-        <div className="flex flex-wrap gap-2">
+        <div className="grid grid-cols-1 gap-1">
           {links.map((link) => (
             <a
               key={link.id}
               href={link.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="rounded-full bg-slate-800 px-3 py-1 text-sm text-sky-400 hover:bg-slate-700"
+              className="flex items-center gap-2 rounded px-2 py-1 text-sm text-sky-400 hover:bg-slate-800 hover:text-sky-300"
             >
-              {link.name}
+              <SiteFavicon url={link.url} />
+              <span className="truncate">{link.name}</span>
             </a>
           ))}
         </div>

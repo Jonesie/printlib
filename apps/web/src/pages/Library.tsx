@@ -71,15 +71,14 @@ export default function Library() {
 
   return (
     <div className="mx-auto grid max-w-[1600px] grid-cols-1 gap-6 lg:grid-cols-[260px_1fr_260px] lg:items-start">
-      <div className="order-1 min-w-0 lg:sticky lg:top-6">
+      <div className="order-1 grid min-w-0 gap-6 lg:sticky lg:top-6">
         <ProfilePanel />
+        <SiteLinksPanel />
       </div>
 
       <PrintersPanel />
 
       <div className="order-3 grid gap-6 lg:order-2">
-        <SiteLinksPanel />
-
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex flex-1 flex-wrap gap-3">
             <input
