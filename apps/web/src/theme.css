@@ -109,3 +109,55 @@
   --sky-900: #4c1d95;
   --sky-950: #2e1065;
 }
+
+:root[data-theme="pink"] {
+  --slate-50: #faf1f4;
+  --slate-100: #f4e1e8;
+  --slate-200: #e8c3d3;
+  --slate-300: #d69bb5;
+  --slate-400: #c07295;
+  --slate-500: #9c5170;
+  --slate-600: #7a3c56;
+  --slate-700: #5a2b40;
+  --slate-800: #3f1e2d;
+  --slate-900: #29141e;
+  --slate-950: #190c13;
+
+  --sky-50: #fdf2f8;
+  --sky-100: #fce7f3;
+  --sky-200: #fbcfe8;
+  --sky-300: #f9a8d4;
+  --sky-400: #f472b6;
+  --sky-500: #ec4899;
+  --sky-600: #db2777;
+  --sky-700: #be185d;
+  --sky-800: #9d174d;
+  --sky-900: #831843;
+  --sky-950: #500724;
+}
+
+:root[data-theme="red"] {
+  --slate-50: #f7f0ef;
+  --slate-100: #efe0de;
+  --slate-200: #ddbfbb;
+  --slate-300: #c2938c;
+  --slate-400: #a06860;
+  --slate-500: #7d4a43;
+  --slate-600: #603631;
+  --slate-700: #482722;
+  --slate-800: #331a17;
+  --slate-900: #21100e;
+  --slate-950: #140908;
+
+  --sky-50: #fef2f2;
+  --sky-100: #fee2e2;
+  --sky-200: #fecaca;
+  --sky-300: #fca5a5;
+  --sky-400: #f87171;
+  --sky-500: #ef4444;
+  --sky-600: #dc2626;
+  --sky-700: #b91c1c;
+  --sky-800: #991b1b;
+  --sky-900: #7f1d1d;
+  --sky-950: #450a0a;
+}
