@@ -1,5 +1,5 @@
-import { useState } from "react";
-import type { PrintLog } from "@printlib/shared";
+import { useEffect, useState } from "react";
+import type { Printer, PrintLog } from "@printlib/shared";
 import { api } from "../api/client";
 import FilePickerButton from "./FilePickerButton";
 
@@ -44,6 +44,19 @@ function PrintLogFields({
   const [material, setMaterial] = useState(log?.material ?? "");
   const [photo, setPhoto] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [printers, setPrinters] = useState<Printer[]>([]);
+
+  useEffect(() => {
+    api.listPrinters().then(setPrinters);
+  }, []);
+
+  // If this log's printer isn't one of the current printers (renamed,
+  // deleted, or logged before any printers existed), keep it selectable
+  // rather than silently dropping it from the dropdown.
+  const printerOptions =
+    printerName && !printers.some((p) => p.name === printerName)
+      ? [...printers, { id: -1, name: printerName } as Printer]
+      : printers;
 
   async function submit() {
     setSubmitting(true);
@@ -91,12 +104,18 @@ function PrintLogFields({
           onChange={(e) => setNotes(e.target.value)}
         />
         <div className="grid grid-cols-2 gap-3">
-          <input
+          <select
             className="rounded bg-slate-800 px-3 py-2"
-            placeholder="Printer (optional)"
             value={printerName}
             onChange={(e) => setPrinterName(e.target.value)}
-          />
+          >
+            <option value="">No printer</option>
+            {printerOptions.map((p) => (
+              <option key={p.id} value={p.name}>
+                {p.name}
+              </option>
+            ))}
+          </select>
           <input
             className="rounded bg-slate-800 px-3 py-2"
             placeholder="Material (optional)"
