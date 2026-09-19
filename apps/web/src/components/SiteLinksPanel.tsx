@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import type { SiteLink } from "@printlib/shared";
 import { api } from "../api/client";
 import { useAuth } from "../auth/AuthContext";
+import Modal from "./Modal";
 
 function SiteFavicon({ url }: { url: string }) {
   const [failed, setFailed] = useState(false);
@@ -90,51 +91,53 @@ export default function SiteLinksPanel() {
       <div className="mb-2 flex items-center justify-between">
         <h2 className="font-medium text-slate-200">Find models on</h2>
         {authenticated && (
-          <button onClick={() => setEditing((v) => !v)} className="text-sm text-slate-400 hover:text-slate-200">
-            {editing ? "Done" : "Edit"}
+          <button onClick={() => setEditing(true)} className="text-sm text-slate-400 hover:text-slate-200">
+            Edit
           </button>
         )}
       </div>
 
-      {editing && authenticated ? (
-        <div className="grid grid-cols-1 gap-2">
-          {links.map((link) => (
-            <EditableRow key={link.id} link={link} onChanged={refresh} />
-          ))}
-          <div className="mt-1 flex items-center gap-2">
-            <input
-              className="w-32 rounded bg-slate-800 px-2 py-1 text-sm"
-              placeholder="Name"
-              value={newName}
-              onChange={(e) => setNewName(e.target.value)}
-            />
-            <input
-              className="min-w-0 flex-1 rounded bg-slate-800 px-2 py-1 text-sm"
-              placeholder="https://..."
-              value={newUrl}
-              onChange={(e) => setNewUrl(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && addLink()}
-            />
-            <button onClick={addLink} className="rounded-md border border-slate-700 px-3 py-1 text-sm hover:bg-slate-800">
-              Add
-            </button>
+      <div className="grid grid-cols-1 gap-1">
+        {links.map((link) => (
+          <a
+            key={link.id}
+            href={link.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 rounded px-2 py-1 text-sm text-sky-400 hover:bg-slate-800 hover:text-sky-300"
+          >
+            <SiteFavicon url={link.url} />
+            <span className="truncate">{link.name}</span>
+          </a>
+        ))}
+      </div>
+
+      {editing && authenticated && (
+        <Modal title="Edit site links" onClose={() => setEditing(false)}>
+          <div className="grid grid-cols-1 gap-2">
+            {links.map((link) => (
+              <EditableRow key={link.id} link={link} onChanged={refresh} />
+            ))}
+            <div className="mt-1 flex items-center gap-2">
+              <input
+                className="w-32 rounded bg-slate-800 px-2 py-1 text-sm"
+                placeholder="Name"
+                value={newName}
+                onChange={(e) => setNewName(e.target.value)}
+              />
+              <input
+                className="min-w-0 flex-1 rounded bg-slate-800 px-2 py-1 text-sm"
+                placeholder="https://..."
+                value={newUrl}
+                onChange={(e) => setNewUrl(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && addLink()}
+              />
+              <button onClick={addLink} className="rounded-md border border-slate-700 px-3 py-1 text-sm hover:bg-slate-800">
+                Add
+              </button>
+            </div>
           </div>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 gap-1">
-          {links.map((link) => (
-            <a
-              key={link.id}
-              href={link.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2 rounded px-2 py-1 text-sm text-sky-400 hover:bg-slate-800 hover:text-sky-300"
-            >
-              <SiteFavicon url={link.url} />
-              <span className="truncate">{link.name}</span>
-            </a>
-          ))}
-        </div>
+        </Modal>
       )}
     </div>
   );

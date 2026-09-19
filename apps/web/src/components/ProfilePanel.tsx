@@ -4,6 +4,7 @@ import { api } from "../api/client";
 import { useAuth } from "../auth/AuthContext";
 import ProfileForm from "./ProfileForm";
 import Lightbox from "./Lightbox";
+import Modal from "./Modal";
 
 export default function ProfilePanel() {
   const { authenticated } = useAuth();
@@ -26,16 +27,7 @@ export default function ProfilePanel() {
 
   return (
     <div className="rounded-lg border border-slate-800 bg-slate-900 p-4">
-      {editing || (!profile && authenticated) ? (
-        <ProfileForm
-          profile={profile}
-          onDone={() => {
-            setEditing(false);
-            refresh();
-          }}
-          onCancel={() => setEditing(false)}
-        />
-      ) : profile ? (
+      {profile ? (
         <div className="grid grid-cols-1 gap-2">
           {profile.avatarFilename && (
             <img
@@ -89,9 +81,28 @@ export default function ProfilePanel() {
             </button>
           )}
         </div>
-      ) : null}
+      ) : (
+        authenticated && (
+          <button onClick={() => setEditing(true)} className="text-sm text-sky-400 hover:text-sky-300">
+            + Add profile
+          </button>
+        )
+      )}
 
       <Lightbox src={lightboxSrc} onClose={() => setLightboxSrc(null)} />
+
+      {editing && (
+        <Modal title={profile ? "Edit profile" : "Add profile"} onClose={() => setEditing(false)}>
+          <ProfileForm
+            profile={profile}
+            onDone={() => {
+              setEditing(false);
+              refresh();
+            }}
+            onCancel={() => setEditing(false)}
+          />
+        </Modal>
+      )}
     </div>
   );
 }

@@ -2,6 +2,7 @@ import { useRef, useState } from "react";
 import type { Category } from "@printlib/shared";
 import { detectSourceSiteName } from "@printlib/shared";
 import { api } from "../api/client";
+import Modal from "./Modal";
 
 export default function UploadDropzone({
   categories,
@@ -91,14 +92,7 @@ export default function UploadDropzone({
   }
 
   return (
-    <div className="rounded-lg border border-slate-800 bg-slate-900 p-4">
-      <div className="mb-3 flex items-center justify-between">
-        <h2 className="text-lg font-semibold">Add a model</h2>
-        <button onClick={() => setOpen(false)} className="text-slate-400 hover:text-slate-200">
-          Cancel
-        </button>
-      </div>
-
+    <Modal title="Add a model" onClose={() => setOpen(false)}>
       <div className="grid grid-cols-1 gap-3">
         <input
           className="rounded bg-slate-800 px-3 py-2"
@@ -206,6 +200,6 @@ export default function UploadDropzone({
           {submitting ? "Uploading…" : "Upload"}
         </button>
       </div>
-    </div>
+    </Modal>
   );
 }
