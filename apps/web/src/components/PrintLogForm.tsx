@@ -45,9 +45,12 @@ function PrintLogFields({
   const [photo, setPhoto] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [printers, setPrinters] = useState<Printer[]>([]);
+  const [materials, setMaterials] = useState<string[]>([]);
+  const [addingNewMaterial, setAddingNewMaterial] = useState(false);
 
   useEffect(() => {
     api.listPrinters().then(setPrinters);
+    api.listMaterials().then(setMaterials);
   }, []);
 
   // If this log's printer isn't one of the current printers (renamed,
@@ -57,6 +60,8 @@ function PrintLogFields({
     printerName && !printers.some((p) => p.name === printerName)
       ? [...printers, { id: -1, name: printerName } as Printer]
       : printers;
+
+  const materialOptions = material && !materials.includes(material) ? [...materials, material] : materials;
 
   async function submit() {
     setSubmitting(true);
@@ -116,12 +121,39 @@ function PrintLogFields({
               </option>
             ))}
           </select>
-          <input
-            className="rounded bg-slate-800 px-3 py-2"
-            placeholder="Material (optional)"
-            value={material}
-            onChange={(e) => setMaterial(e.target.value)}
-          />
+          {addingNewMaterial ? (
+            <input
+              autoFocus
+              className="rounded bg-slate-800 px-3 py-2"
+              placeholder="New material"
+              value={material}
+              onChange={(e) => setMaterial(e.target.value)}
+              onBlur={() => {
+                if (!material.trim()) setAddingNewMaterial(false);
+              }}
+            />
+          ) : (
+            <select
+              className="rounded bg-slate-800 px-3 py-2"
+              value={material}
+              onChange={(e) => {
+                if (e.target.value === "__new__") {
+                  setMaterial("");
+                  setAddingNewMaterial(true);
+                } else {
+                  setMaterial(e.target.value);
+                }
+              }}
+            >
+              <option value="">No material</option>
+              {materialOptions.map((m) => (
+                <option key={m} value={m}>
+                  {m}
+                </option>
+              ))}
+              <option value="__new__">+ Add new material…</option>
+            </select>
+          )}
         </div>
         <FilePickerButton file={photo} onChange={setPhoto} />
         {log?.photoFilename && !photo && (

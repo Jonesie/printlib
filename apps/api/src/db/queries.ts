@@ -336,6 +336,15 @@ export function deletePrintLog(id: number): void {
   db.prepare(`DELETE FROM print_logs WHERE id = ?`).run(id);
 }
 
+export function listDistinctMaterials(): string[] {
+  const rows = db
+    .prepare(
+      `SELECT DISTINCT material FROM print_logs WHERE material IS NOT NULL AND material != '' ORDER BY material`,
+    )
+    .all() as { material: string }[];
+  return rows.map((r) => r.material);
+}
+
 export function listSiteLinks(): SiteLink[] {
   return db.prepare(`SELECT * FROM site_links ORDER BY name`).all().map(rowToSiteLink);
 }

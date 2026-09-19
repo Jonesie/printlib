@@ -189,6 +189,10 @@ export const api = {
     return fetch(`/api/printers`).then((r) => json<Printer[]>(r));
   },
 
+  listMaterials() {
+    return fetch(`/api/materials`).then((r) => json<string[]>(r));
+  },
+
   createPrinter(form: FormData) {
     return fetch(`/api/printers`, { method: "POST", body: form }).then((r) => json<Printer>(r));
   },

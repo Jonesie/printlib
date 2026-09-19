@@ -2,7 +2,14 @@ import fs from "node:fs";
 import path from "node:path";
 import crypto from "node:crypto";
 import type { FastifyInstance } from "fastify";
-import { addPrintLog, deletePrintLog, getModelDetail, getPrintLog, updatePrintLog } from "../db/queries.js";
+import {
+  addPrintLog,
+  deletePrintLog,
+  getModelDetail,
+  getPrintLog,
+  listDistinctMaterials,
+  updatePrintLog,
+} from "../db/queries.js";
 import { PRINT_LOGS_DIR } from "../config.js";
 
 // The frontend sends a full ISO instant (the chosen calendar date combined
@@ -27,6 +34,8 @@ function savePhoto(filename: string, buffer: Buffer): string {
 }
 
 export default async function printLogsRoutes(app: FastifyInstance) {
+  app.get("/api/materials", async () => listDistinctMaterials());
+
   // multipart/form-data: success ("true"/"false"), date? (YYYY-MM-DD, defaults to now),
   // notes?, printerName?, material?, photo? (image file)
   app.post("/api/models/:id/print-logs", async (request, reply) => {
