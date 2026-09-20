@@ -96,6 +96,7 @@ export interface ModelFilters {
   search?: string;
   categoryId?: number;
   tagId?: number;
+  printerName?: string;
 }
 
 export function listModels(filters: ModelFilters): ModelSummary[] {
@@ -113,6 +114,10 @@ export function listModels(filters: ModelFilters): ModelSummary[] {
   if (filters.tagId) {
     clauses.push("m.id IN (SELECT model_id FROM model_tags WHERE tag_id = @tagId)");
     params.tagId = filters.tagId;
+  }
+  if (filters.printerName) {
+    clauses.push("m.id IN (SELECT model_id FROM print_logs WHERE printer_name = @printerName)");
+    params.printerName = filters.printerName;
   }
 
   const where = clauses.length ? `WHERE ${clauses.join(" AND ")}` : "";

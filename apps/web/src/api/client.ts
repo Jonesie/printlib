@@ -38,11 +38,12 @@ export const api = {
     return fetch(`/api/logout`, { method: "POST" }).then((r) => json<{ ok: true }>(r));
   },
 
-  listModels(params: { search?: string; categoryId?: number; tagId?: number } = {}) {
+  listModels(params: { search?: string; categoryId?: number; tagId?: number; printerName?: string } = {}) {
     const qs = new URLSearchParams();
     if (params.search) qs.set("search", params.search);
     if (params.categoryId) qs.set("categoryId", String(params.categoryId));
     if (params.tagId) qs.set("tagId", String(params.tagId));
+    if (params.printerName) qs.set("printerName", params.printerName);
     return fetch(`/api/models?${qs}`).then((r) => json<ModelSummary[]>(r));
   },
 

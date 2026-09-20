@@ -25,11 +25,12 @@ async function readMultipartBuffer(part: AsyncIterable<Buffer>): Promise<Buffer>
 
 export default async function modelsRoutes(app: FastifyInstance) {
   app.get("/api/models", async (request) => {
-    const query = request.query as { search?: string; categoryId?: string; tagId?: string };
+    const query = request.query as { search?: string; categoryId?: string; tagId?: string; printerName?: string };
     return listModels({
       search: query.search,
       categoryId: query.categoryId ? Number(query.categoryId) : undefined,
       tagId: query.tagId ? Number(query.tagId) : undefined,
+      printerName: query.printerName || undefined,
     });
   });
 

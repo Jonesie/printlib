@@ -116,3 +116,40 @@ describe("PATCH /api/models/:id", () => {
     expect(res.json().sourceSiteName).toBe("Thingiverse");
   });
 });
+
+describe("GET /api/models?printerName=", () => {
+  async function createModel(name: string) {
+    const { body, headers } = multipart({ name, sourceUrl: "https://www.printables.com/model/3-thing" });
+    const res = await app.inject({
+      method: "POST",
+      url: "/api/models",
+      headers,
+      payload: body,
+      cookies: { printlib_session: sessionCookie },
+    });
+    return res.json().id as number;
+  }
+
+  async function logPrint(modelId: number, printerName: string) {
+    const { body, headers } = multipart({ success: "true", date: "2026-01-01T00:00:00.000Z", printerName });
+    await app.inject({
+      method: "POST",
+      url: `/api/models/${modelId}/print-logs`,
+      headers,
+      payload: body,
+      cookies: { printlib_session: sessionCookie },
+    });
+  }
+
+  it("only returns models printed on the given printer", async () => {
+    const printedOnA = await createModel("Printed on A");
+    const printedOnB = await createModel("Printed on B");
+    await logPrint(printedOnA, "Printer A");
+    await logPrint(printedOnB, "Printer B");
+
+    const res = await app.inject({ method: "GET", url: "/api/models?printerName=Printer%20A" });
+    const ids = (res.json() as { id: number }[]).map((m) => m.id);
+    expect(ids).toContain(printedOnA);
+    expect(ids).not.toContain(printedOnB);
+  });
+});

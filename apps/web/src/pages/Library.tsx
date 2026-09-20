@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import type { Category, ModelSummary } from "@printlib/shared";
+import type { Category, ModelSummary, Printer } from "@printlib/shared";
 import { api } from "../api/client";
 import UploadDropzone from "../components/UploadDropzone";
 import CategoryManager from "../components/CategoryManager";
@@ -29,8 +29,10 @@ export default function Library() {
   const { authenticated } = useAuth();
   const [models, setModels] = useState<ModelSummary[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [printers, setPrinters] = useState<Printer[]>([]);
   const [search, setSearch] = useState("");
   const [categoryId, setCategoryId] = useState<string>("");
+  const [printerName, setPrinterName] = useState("");
   const [sortBy, setSortBy] = useState<SortBy>(readStoredSort);
   const [minRating, setMinRating] = useState<string>("");
   const [loading, setLoading] = useState(true);
@@ -46,19 +48,25 @@ export default function Library() {
 
   async function refresh() {
     setLoading(true);
-    const [modelsRes, categoriesRes] = await Promise.all([
-      api.listModels({ search: search || undefined, categoryId: categoryId ? Number(categoryId) : undefined }),
+    const [modelsRes, categoriesRes, printersRes] = await Promise.all([
+      api.listModels({
+        search: search || undefined,
+        categoryId: categoryId ? Number(categoryId) : undefined,
+        printerName: printerName || undefined,
+      }),
       api.listCategories(),
+      api.listPrinters(),
     ]);
     setModels(modelsRes);
     setCategories(categoriesRes);
+    setPrinters(printersRes);
     setLoading(false);
   }
 
   useEffect(() => {
     refresh();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [search, categoryId]);
+  }, [search, categoryId, printerName]);
 
   const visibleModels = models
     .filter((m) => !minRating || (m.rating ?? 0) >= Number(minRating))
@@ -99,6 +107,20 @@ export default function Library() {
                 </option>
               ))}
             </select>
+            {printers.length > 0 && (
+              <select
+                className="rounded bg-slate-800 px-3 py-2"
+                value={printerName}
+                onChange={(e) => setPrinterName(e.target.value)}
+              >
+                <option value="">All printers</option>
+                {printers.map((p) => (
+                  <option key={p.id} value={p.name}>
+                    {p.name}
+                  </option>
+                ))}
+              </select>
+            )}
             <select
               className="rounded bg-slate-800 px-3 py-2"
               value={minRating}
