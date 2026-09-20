@@ -70,4 +70,24 @@ describe("GET /api/materials", () => {
     expect(materials).toContain("PETG");
     expect(materials.filter((m) => m === "PLA")).toHaveLength(1);
   });
+
+  it("always includes the standard filament types, even unlogged ones", async () => {
+    const res = await app.inject({ method: "GET", url: "/api/materials" });
+    const materials = res.json() as string[];
+    expect(materials).toContain("ABS");
+    expect(materials).toContain("TPU");
+    expect(materials).toContain("Nylon");
+  });
+
+  it("includes a custom logged material alongside the standard ones", async () => {
+    const modelId = await createModel();
+    await logPrint(modelId, "Wood Fill");
+    await logPrint(modelId, "Glow-in-the-dark PLA");
+
+    const res = await app.inject({ method: "GET", url: "/api/materials" });
+    const materials = res.json() as string[];
+    expect(materials).toContain("PLA");
+    expect(materials).toContain("Glow-in-the-dark PLA");
+    expect(materials.filter((m) => m === "Wood Fill")).toHaveLength(1);
+  });
 });

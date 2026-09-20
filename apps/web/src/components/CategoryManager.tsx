@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { Category } from "@printlib/shared";
 import { api } from "../api/client";
+import Modal from "./Modal";
 
 function CategoryRow({ category, onChanged }: { category: Category; onChanged: () => void }) {
   const [name, setName] = useState(category.name);
@@ -64,41 +65,38 @@ export default function CategoryManager({
     onChanged();
   }
 
-  if (!open) {
-    return (
+  return (
+    <>
       <button onClick={() => setOpen(true)} className="text-sm text-slate-400 hover:text-slate-200">
         Manage categories
       </button>
-    );
-  }
 
-  return (
-    <div className="rounded-lg border border-slate-800 bg-slate-900 p-4">
-      <div className="mb-3 flex items-center justify-between">
-        <h3 className="font-medium">Categories</h3>
-        <button onClick={() => setOpen(false)} className="text-sm text-slate-400 hover:text-slate-200">
-          Close
-        </button>
-      </div>
-      <div className="grid grid-cols-1 gap-2">
-        {categories.map((c) => (
-          <CategoryRow key={c.id} category={c} onChanged={onChanged} />
-        ))}
-        <div className="mt-2 flex gap-2">
-          <input
-            className="min-w-0 flex-1 rounded bg-slate-800 px-3 py-1.5 text-sm"
-            placeholder="New category"
-            value={newName}
-            onChange={(e) => setNewName(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") addCategory();
-            }}
-          />
-          <button onClick={addCategory} className="rounded-md border border-slate-700 px-3 py-1.5 text-sm hover:bg-slate-800">
-            Add
-          </button>
-        </div>
-      </div>
-    </div>
+      {open && (
+        <Modal title="Categories" onClose={() => setOpen(false)}>
+          <div className="grid grid-cols-1 gap-2">
+            {categories.map((c) => (
+              <CategoryRow key={c.id} category={c} onChanged={onChanged} />
+            ))}
+            <div className="mt-2 flex gap-2">
+              <input
+                className="min-w-0 flex-1 rounded bg-slate-800 px-3 py-1.5 text-sm"
+                placeholder="New category"
+                value={newName}
+                onChange={(e) => setNewName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") addCategory();
+                }}
+              />
+              <button
+                onClick={addCategory}
+                className="rounded-md border border-slate-700 px-3 py-1.5 text-sm hover:bg-slate-800"
+              >
+                Add
+              </button>
+            </div>
+          </div>
+        </Modal>
+      )}
+    </>
   );
 }

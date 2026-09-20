@@ -341,13 +341,19 @@ export function deletePrintLog(id: number): void {
   db.prepare(`DELETE FROM print_logs WHERE id = ?`).run(id);
 }
 
+// Shown even before anyone's logged a print with them, so the material
+// dropdown isn't empty on a fresh install.
+const STANDARD_MATERIALS = ["PLA", "PETG", "ABS", "TPU", "ASA", "Nylon", "PC", "Wood Fill"];
+
 export function listDistinctMaterials(): string[] {
   const rows = db
     .prepare(
       `SELECT DISTINCT material FROM print_logs WHERE material IS NOT NULL AND material != '' ORDER BY material`,
     )
     .all() as { material: string }[];
-  return rows.map((r) => r.material);
+  const logged = rows.map((r) => r.material);
+  const merged = new Set([...STANDARD_MATERIALS, ...logged]);
+  return [...merged].sort((a, b) => a.localeCompare(b));
 }
 
 export function listSiteLinks(): SiteLink[] {
