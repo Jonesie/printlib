@@ -13,16 +13,23 @@ export default function Modal({
 }) {
   const panelRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    function focusable(): HTMLElement[] {
-      return Array.from(
-        panelRef.current?.querySelectorAll<HTMLElement>(
-          'input, textarea, select, button, a[href], [tabindex]:not([tabindex="-1"])',
-        ) ?? [],
-      );
-    }
-    focusable()[0]?.focus();
+  function focusable(): HTMLElement[] {
+    return Array.from(
+      panelRef.current?.querySelectorAll<HTMLElement>(
+        'input, textarea, select, button, a[href], [tabindex]:not([tabindex="-1"])',
+      ) ?? [],
+    );
+  }
 
+  // Runs once, on mount — not on every parent re-render (e.g. onClose being
+  // a fresh inline function on every keystroke), which would otherwise yank
+  // focus back to the first field while the user is still typing elsewhere.
+  useEffect(() => {
+    focusable()[0]?.focus();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if (e.key === "Escape") {
         onClose();
