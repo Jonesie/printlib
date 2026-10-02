@@ -26,6 +26,22 @@ export const api = {
     return fetch(`/api/version`).then((r) => json<VersionStatus>(r));
   },
 
+  getIntegrations() {
+    return fetch(`/api/integrations`).then((r) => json<{ bluesky: boolean }>(r));
+  },
+
+  getShareDraft(printLogId: number) {
+    return fetch(`/api/print-logs/${printLogId}/share-draft`).then((r) => json<{ text: string }>(r));
+  },
+
+  shareToBluesky(printLogId: number, text: string) {
+    return fetch(`/api/print-logs/${printLogId}/share/bluesky`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text }),
+    }).then((r) => json<{ url: string; imageSkipped: boolean }>(r));
+  },
+
   login(password: string) {
     return fetch(`/api/login`, {
       method: "POST",

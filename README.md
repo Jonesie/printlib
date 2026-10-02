@@ -26,6 +26,8 @@ a login.
 - A home-page panel linking out to popular model sites (Printables,
   MakerWorld, Thingiverse, MyMiniFactory, Cults3D, Gridfinity by default),
   editable once logged in
+- Share a print log (with its photo) to Bluesky from the print history, once
+  `BLUESKY_HANDLE`/`BLUESKY_APP_PASSWORD` are configured
 - A printers section for your own hardware: name, model, purchase date and
   price, a photo, and notes
 - A profile panel (name, avatar, location, bio, email/phone, social links) —
@@ -117,6 +119,9 @@ Set in `apps/api/.env` (see `apps/api/.env.example`):
 | `SESSION_SECRET`  | yes      | Random secret signing the session cookie        |
 | `DATA_DIR`        | no       | Where the DB and uploaded files live (`./data`) |
 | `PORT`            | no       | API port (`8000`)                               |
+| `BLUESKY_HANDLE`  | no       | Bluesky handle for sharing print logs (e.g. `you.bsky.social`) |
+| `BLUESKY_APP_PASSWORD` | no  | A Bluesky *app password* (not your login password); sharing is off unless both are set |
+| `PUBLIC_URL`      | no       | Public URL of the site; shared posts link back to the model page |
 
 ### Deploying behind your own reverse proxy
 
