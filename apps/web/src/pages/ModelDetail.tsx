@@ -9,7 +9,7 @@ import PrintLogForm, { EditPrintLogForm } from "../components/PrintLogForm";
 import StarRating from "../components/StarRating";
 import Lightbox from "../components/Lightbox";
 import SourcePill from "../components/SourcePill";
-import BlueskyShareButton from "../components/BlueskyShareButton";
+import ShareButtons from "../components/ShareButtons";
 import { useAuth } from "../auth/AuthContext";
 
 export default function ModelDetail() {
@@ -28,7 +28,7 @@ export default function ModelDetail() {
   const [savingModel, setSavingModel] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [editingLogId, setEditingLogId] = useState<number | null>(null);
-  const [blueskyEnabled, setBlueskyEnabled] = useState(false);
+  const [integrations, setIntegrations] = useState({ bluesky: false, facebook: false, instagram: false });
 
   async function refresh() {
     const m = await api.getModel(Number(id));
@@ -44,7 +44,7 @@ export default function ModelDetail() {
     refresh();
     if (authenticated) {
       api.listCategories().then(setCategories);
-      api.getIntegrations().then((i) => setBlueskyEnabled(i.bluesky)).catch(() => {});
+      api.getIntegrations().then(setIntegrations).catch(() => {});
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, authenticated]);
@@ -332,7 +332,7 @@ export default function ModelDetail() {
                     </div>
                     <div className="flex shrink-0 flex-col items-end justify-between gap-2 text-sm">
                       <div className="flex h-6 items-center">
-                        {blueskyEnabled && <BlueskyShareButton logId={log.id} />}
+                        <ShareButtons logId={log.id} hasPhoto={!!log.photoFilename} integrations={integrations} />
                       </div>
                       <div className="flex gap-3">
                         <button onClick={() => setEditingLogId(log.id)} className="text-sky-400 hover:text-sky-300">

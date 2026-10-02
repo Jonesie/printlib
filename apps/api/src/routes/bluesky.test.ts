@@ -4,6 +4,7 @@ import os from "node:os";
 import path from "node:path";
 import sharp from "sharp";
 import { beforeAll, describe, expect, it } from "vitest";
+import { PRINT_LOGS_DIR } from "../config.js";
 import { buildApp } from "../app.js";
 import { MAX_IMAGE_BYTES, defaultPostText, fitImageForBluesky, graphemeLength } from "../lib/bluesky.js";
 
@@ -35,7 +36,7 @@ async function createLog() {
 describe("bluesky sharing (unconfigured)", () => {
   it("reports the integration as disabled", async () => {
     const res = await app.inject({ method: "GET", url: "/api/integrations" });
-    expect(res.json()).toEqual({ bluesky: false });
+    expect(res.json()).toEqual({ bluesky: false, facebook: false, instagram: false });
   });
 
   it("requires a session to share", async () => {
@@ -70,6 +71,41 @@ describe("bluesky helpers", () => {
 
   it("counts graphemes, not UTF-16 units", () => {
     expect(graphemeLength("a👨‍👩‍👧b")).toBe(3);
+  });
+});
+
+describe("other sites (unconfigured)", () => {
+  it.each(["facebook", "instagram"])("rejects sharing to %s when not configured", async (site) => {
+    const id = await createLog();
+    const res = await app.inject({
+      method: "POST",
+      url: `/api/print-logs/${id}/share/${site}`,
+      payload: { text: "hi" },
+      cookies: { printlib_session: sessionCookie },
+    });
+    expect(res.statusCode).toBe(400);
+    expect(res.json().error).toMatch(/not configured/);
+  });
+
+  it("404s for an unknown site", async () => {
+    const id = await createLog();
+    const res = await app.inject({
+      method: "POST",
+      url: `/api/print-logs/${id}/share/myspace`,
+      payload: { text: "hi" },
+      cookies: { printlib_session: sessionCookie },
+    });
+    expect(res.statusCode).toBe(404);
+  });
+
+  it("serves a print log photo converted to JPEG for Instagram", async () => {
+    const png = await sharp({ create: { width: 20, height: 20, channels: 4, background: "#f00" } }).png().toBuffer();
+    fs.mkdirSync(PRINT_LOGS_DIR, { recursive: true });
+    fs.writeFileSync(path.join(PRINT_LOGS_DIR, "ig-test.png"), png);
+    const res = await app.inject({ method: "GET", url: "/api/print-log-photos/ig-test.png?format=jpeg" });
+    expect(res.statusCode).toBe(200);
+    expect(res.headers["content-type"]).toBe("image/jpeg");
+    expect((await sharp(res.rawPayload).metadata()).format).toBe("jpeg");
   });
 });
 
