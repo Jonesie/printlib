@@ -1,6 +1,11 @@
+import crypto from "node:crypto";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
+import sharp from "sharp";
 import { beforeAll, describe, expect, it } from "vitest";
 import { buildApp } from "../app.js";
-import { defaultPostText, graphemeLength } from "../lib/bluesky.js";
+import { MAX_IMAGE_BYTES, defaultPostText, fitImageForBluesky, graphemeLength } from "../lib/bluesky.js";
 
 const app = buildApp();
 let sessionCookie: string;
@@ -65,5 +70,36 @@ describe("bluesky helpers", () => {
 
   it("counts graphemes, not UTF-16 units", () => {
     expect(graphemeLength("a👨‍👩‍👧b")).toBe(3);
+  });
+});
+
+describe("fitImageForBluesky", () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "bsky-img-"));
+
+  async function noisyPng(file: string, size: number) {
+    const raw = crypto.randomBytes(size * size * 3);
+    await sharp(raw, { raw: { width: size, height: size, channels: 3 } }).png().toFile(file);
+    return file;
+  }
+
+  it("leaves a small photo untouched", async () => {
+    const file = await noisyPng(path.join(dir, "small.png"), 100);
+    const out = await fitImageForBluesky(file, "image/png");
+    expect(out?.mime).toBe("image/png");
+    expect(out?.data.equals(fs.readFileSync(file))).toBe(true);
+  });
+
+  it("shrinks an oversized photo to a JPEG under the limit", async () => {
+    const file = await noisyPng(path.join(dir, "big.png"), 1500);
+    expect(fs.statSync(file).size).toBeGreaterThan(MAX_IMAGE_BYTES);
+    const out = await fitImageForBluesky(file, "image/png");
+    expect(out?.mime).toBe("image/jpeg");
+    expect(out!.data.length).toBeLessThanOrEqual(MAX_IMAGE_BYTES);
+  });
+
+  it("returns null for an unreadable image", async () => {
+    const file = path.join(dir, "bad.png");
+    fs.writeFileSync(file, Buffer.alloc(MAX_IMAGE_BYTES + 10, 1));
+    expect(await fitImageForBluesky(file, "image/png")).toBeNull();
   });
 });

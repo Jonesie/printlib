@@ -1,10 +1,11 @@
 import fs from "node:fs";
 import path from "node:path";
+import sharp from "sharp";
 import { BLUESKY_APP_PASSWORD, BLUESKY_HANDLE, BLUESKY_SERVICE, PRINT_LOGS_DIR, PUBLIC_URL } from "../config.js";
 
 export const MAX_POST_GRAPHEMES = 300;
 // Bluesky rejects image blobs larger than this.
-const MAX_IMAGE_BYTES = 976_560;
+export const MAX_IMAGE_BYTES = 976_560;
 
 const MIME_BY_EXT: Record<string, string> = {
   jpg: "image/jpeg",
@@ -13,6 +14,32 @@ const MIME_BY_EXT: Record<string, string> = {
   gif: "image/gif",
   webp: "image/webp",
 };
+
+// Returns the photo as-is when it already fits, otherwise re-encodes it as a
+// JPEG (honouring EXIF rotation), shrinking until it is under Bluesky's limit.
+export async function fitImageForBluesky(
+  file: string,
+  mime: string,
+): Promise<{ data: Buffer; mime: string } | null> {
+  const original = fs.readFileSync(file);
+  if (original.length <= MAX_IMAGE_BYTES) return { data: original, mime };
+  try {
+    for (const edge of [2000, 1600, 1280, 1024, 800]) {
+      for (const quality of [85, 70, 55]) {
+        const data = await sharp(original)
+          .rotate()
+          .resize({ width: edge, height: edge, fit: "inside", withoutEnlargement: true })
+          .flatten({ background: "#ffffff" })
+          .jpeg({ quality, mozjpeg: true })
+          .toBuffer();
+        if (data.length <= MAX_IMAGE_BYTES) return { data, mime: "image/jpeg" };
+      }
+    }
+  } catch {
+    // unreadable or unsupported image (e.g. animated GIF edge cases) — post without it
+  }
+  return null;
+}
 
 export function isBlueskyConfigured(): boolean {
   return Boolean(BLUESKY_HANDLE && BLUESKY_APP_PASSWORD);
@@ -88,10 +115,11 @@ export async function postToBluesky(text: string, photoFilename: string | null):
   if (photoFilename) {
     const file = path.join(PRINT_LOGS_DIR, path.basename(photoFilename));
     const mime = MIME_BY_EXT[path.extname(file).slice(1).toLowerCase()];
-    if (mime && fs.existsSync(file) && fs.statSync(file).size <= MAX_IMAGE_BYTES) {
-      const { blob } = await xrpc<{ blob: unknown }>("com.atproto.repo.uploadBlob", fs.readFileSync(file), {
+    const image = mime && fs.existsSync(file) ? await fitImageForBluesky(file, mime) : null;
+    if (image) {
+      const { blob } = await xrpc<{ blob: unknown }>("com.atproto.repo.uploadBlob", new Uint8Array(image.data), {
         ...auth,
-        "Content-Type": mime,
+        "Content-Type": image.mime,
       });
       embed = { $type: "app.bsky.embed.images", images: [{ alt: "Print result", image: blob }] };
     } else {
