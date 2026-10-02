@@ -9,6 +9,8 @@ import type {
   VersionStatus,
 } from "@printlib/shared";
 
+export type ShareSite = "bluesky" | "facebook" | "instagram";
+
 async function json<T>(res: Response): Promise<T> {
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
@@ -24,6 +26,22 @@ export const api = {
 
   getVersionStatus() {
     return fetch(`/api/version`).then((r) => json<VersionStatus>(r));
+  },
+
+  getIntegrations() {
+    return fetch(`/api/integrations`).then((r) => json<Record<ShareSite, boolean>>(r));
+  },
+
+  getShareDraft(printLogId: number, site: ShareSite) {
+    return fetch(`/api/print-logs/${printLogId}/share-draft?site=${site}`).then((r) => json<{ text: string }>(r));
+  },
+
+  shareTo(site: ShareSite, printLogId: number, text: string) {
+    return fetch(`/api/print-logs/${printLogId}/share/${site}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text }),
+    }).then((r) => json<{ url: string; imageSkipped: boolean }>(r));
   },
 
   login(password: string) {

@@ -26,6 +26,9 @@ a login.
 - A home-page panel linking out to popular model sites (Printables,
   MakerWorld, Thingiverse, MyMiniFactory, Cults3D, Gridfinity by default),
   editable once logged in
+- Share a print log (with its photo) to Bluesky, Facebook or Instagram from the
+  print history; each button is disabled until that site is configured (see the
+  environment variables below)
 - A printers section for your own hardware: name, model, purchase date and
   price, a photo, and notes
 - A profile panel (name, avatar, location, bio, email/phone, social links) —
@@ -84,6 +87,10 @@ cp apps/api/.env.example apps/api/.env
 docker compose up -d --build
 ```
 
+`docker-compose.yml` loads `apps/api/.env` into the container, so the file must
+exist before you start it. Without `ADMIN_PASSWORD` and `SESSION_SECRET` the app
+exits immediately on startup (check with `docker compose logs printlib`).
+
 Either way, the app is now on `http://localhost:8000`, serving both the API
 and the built frontend from one container. Uploaded files and the SQLite
 database live in `./data` (bind-mounted), so they survive rebuilds/updates.
@@ -117,6 +124,71 @@ Set in `apps/api/.env` (see `apps/api/.env.example`):
 | `SESSION_SECRET`  | yes      | Random secret signing the session cookie        |
 | `DATA_DIR`        | no       | Where the DB and uploaded files live (`./data`) |
 | `PORT`            | no       | API port (`8000`)                               |
+| `BLUESKY_HANDLE`  | no       | Bluesky handle for sharing print logs (e.g. `you.bsky.social`) |
+| `BLUESKY_APP_PASSWORD` | no  | A Bluesky *app password* (not your login password); sharing is off unless both are set |
+| `FACEBOOK_PAGE_ID`, `FACEBOOK_PAGE_ACCESS_TOKEN` | no | Facebook Page ID and a Page access token, to share print logs to the Page; off unless both are set |
+| `INSTAGRAM_ACCOUNT_ID`, `INSTAGRAM_ACCESS_TOKEN` | no | Instagram Business/Creator account ID and access token; also needs an internet-reachable `PUBLIC_URL` (Instagram fetches the photo) and a print log with a photo |
+| `PUBLIC_URL`      | no       | Public URL of the site; shared posts link back to the model page |
+
+### Sharing to social sites
+
+Each print log in the print history has a **Share** row with a button per site.
+A button is greyed out until that site is configured. Set the variables in
+`apps/api/.env`, then recreate the container (`docker compose up -d --force-recreate`)
+so they're picked up. All three are optional, and any combination works.
+
+Set `PUBLIC_URL` (e.g. `https://printlib.example.com`) if you want shared posts
+to link back to the model page.
+
+#### Bluesky
+
+1. In Bluesky go to **Settings → Privacy and security → App passwords** and
+   create one. Use this, never your login password.
+2. Set `BLUESKY_HANDLE` (e.g. `you.bsky.social`) and `BLUESKY_APP_PASSWORD`.
+
+Photos over Bluesky's size limit are shrunk automatically before posting.
+
+#### Facebook (Page)
+
+Posts go to a Facebook **Page** you manage, not to a personal profile (Facebook's
+API doesn't allow that).
+
+1. Create an app at [developers.facebook.com](https://developers.facebook.com/apps)
+   (type: Business) and add yourself as a developer or tester.
+2. In the [Graph API Explorer](https://developers.facebook.com/tools/explorer/),
+   pick your app, choose **Get Page Access Token**, and grant `pages_show_list`,
+   `pages_read_engagement` and `pages_manage_posts`. Select your Page.
+3. That token is short-lived. Exchange it for a long-lived one (see Meta's
+   [access token docs](https://developers.facebook.com/docs/facebook-login/guides/access-tokens/get-long-lived)),
+   then request the Page's token from `/me/accounts` using the long-lived user
+   token — a Page token obtained that way doesn't expire.
+4. Set `FACEBOOK_PAGE_ID` (the Page's numeric ID, shown on its About page or in
+   the `/me/accounts` response) and `FACEBOOK_PAGE_ACCESS_TOKEN`.
+
+#### Instagram
+
+Posting needs an Instagram **Business or Creator** account linked to a Facebook
+Page, and a print log **with a photo** (Instagram doesn't allow text-only posts).
+
+1. Switch the Instagram account to Business or Creator in the Instagram app and
+   link it to your Facebook Page.
+2. Using the same Meta app as above, generate a token with
+   `instagram_basic`, `instagram_content_publish` and `pages_show_list`, and
+   make it long-lived as in the Facebook steps.
+3. Find the Instagram account ID: call `/{page-id}?fields=instagram_business_account`
+   in the Graph API Explorer; the `id` inside `instagram_business_account` is it.
+4. Set `INSTAGRAM_ACCOUNT_ID` and `INSTAGRAM_ACCESS_TOKEN`.
+5. **`PUBLIC_URL` must be reachable from the internet.** Instagram downloads the
+   photo from `PUBLIC_URL/api/print-log-photos/...` itself, so a `localhost` or
+   LAN-only address won't work. Instagram sharing stays disabled until
+   `PUBLIC_URL` is set.
+
+Meta's developer console and permission names change from time to time; if a
+step doesn't match what you see, Meta's docs for the
+[Pages API](https://developers.facebook.com/docs/pages-api/) and
+[Instagram content publishing](https://developers.facebook.com/docs/instagram-platform/content-publishing)
+are the source of truth. While your app is in development mode, only you (and
+other app roles) can post with it, which is fine for personal use.
 
 ### Deploying behind your own reverse proxy
 

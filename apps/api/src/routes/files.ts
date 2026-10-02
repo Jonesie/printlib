@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import sharp from "sharp";
 import AdmZip from "adm-zip";
 import type { FastifyInstance } from "fastify";
 import { deleteModelFile, getModelDetail, getModelFile } from "../db/queries.js";
@@ -57,6 +58,17 @@ export default async function filesRoutes(app: FastifyInstance) {
     const safe = path.basename(filename);
     const filePath = path.join(PRINT_LOGS_DIR, safe);
     if (!fs.existsSync(filePath)) return reply.code(404).send({ error: "Not found" });
+    // ?format=jpeg: Instagram only accepts JPEG, so convert on the fly.
+    if ((request.query as { format?: string }).format === "jpeg") {
+      const jpeg = await sharp(filePath)
+        .rotate()
+        .flatten({ background: "#ffffff" })
+        .jpeg({ quality: 90 })
+        .toBuffer()
+        .catch(() => null);
+      if (!jpeg) return reply.code(415).send({ error: "Unsupported image" });
+      return reply.header("Content-Type", "image/jpeg").send(jpeg);
+    }
     return reply.send(fs.createReadStream(filePath));
   });
 

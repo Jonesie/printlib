@@ -9,6 +9,7 @@ import PrintLogForm, { EditPrintLogForm } from "../components/PrintLogForm";
 import StarRating from "../components/StarRating";
 import Lightbox from "../components/Lightbox";
 import SourcePill from "../components/SourcePill";
+import ShareButtons from "../components/ShareButtons";
 import { useAuth } from "../auth/AuthContext";
 
 export default function ModelDetail() {
@@ -27,6 +28,7 @@ export default function ModelDetail() {
   const [savingModel, setSavingModel] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [editingLogId, setEditingLogId] = useState<number | null>(null);
+  const [integrations, setIntegrations] = useState({ bluesky: false, facebook: false, instagram: false });
 
   async function refresh() {
     const m = await api.getModel(Number(id));
@@ -40,7 +42,10 @@ export default function ModelDetail() {
 
   useEffect(() => {
     refresh();
-    if (authenticated) api.listCategories().then(setCategories);
+    if (authenticated) {
+      api.listCategories().then(setCategories);
+      api.getIntegrations().then(setIntegrations).catch(() => {});
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, authenticated]);
 
@@ -325,13 +330,18 @@ export default function ModelDetail() {
                       )}
                       {log.notes && <p className="mt-1 text-sm text-slate-300">{log.notes}</p>}
                     </div>
-                    <div className="flex shrink-0 gap-3 text-sm">
-                      <button onClick={() => setEditingLogId(log.id)} className="text-sky-400 hover:text-sky-300">
-                        Edit
-                      </button>
-                      <button onClick={() => deletePrintLog(log.id)} className="text-red-400 hover:text-red-300">
-                        Delete
-                      </button>
+                    <div className="flex shrink-0 flex-col items-end justify-between gap-2 text-sm">
+                      <div className="flex h-6 items-center">
+                        <ShareButtons logId={log.id} hasPhoto={!!log.photoFilename} integrations={integrations} />
+                      </div>
+                      <div className="flex gap-3">
+                        <button onClick={() => setEditingLogId(log.id)} className="text-sky-400 hover:text-sky-300">
+                          Edit
+                        </button>
+                        <button onClick={() => deletePrintLog(log.id)} className="text-red-400 hover:text-red-300">
+                          Delete
+                        </button>
+                      </div>
                     </div>
                   </li>
                 ),
