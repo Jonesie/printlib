@@ -17,6 +17,7 @@ import siteLinksRoutes from "./routes/siteLinks.js";
 import printersRoutes from "./routes/printers.js";
 import profileRoutes from "./routes/profile.js";
 import versionRoutes from "./routes/version.js";
+import blueskyRoutes from "./routes/bluesky.js";
 
 // Reading is public (browse/search/view/download/preview) — only writes
 // (uploading, editing, deleting, logging prints) require a session. Login
@@ -54,6 +55,7 @@ export function buildApp() {
   app.register(printersRoutes);
   app.register(profileRoutes);
   app.register(versionRoutes);
+  app.register(blueskyRoutes);
 
   if (WEB_DIST_DIR) {
     app.register(fastifyStatic, { root: WEB_DIST_DIR });
