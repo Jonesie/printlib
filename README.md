@@ -86,6 +86,10 @@ cp apps/api/.env.example apps/api/.env
 docker compose up -d --build
 ```
 
+`docker-compose.yml` loads `apps/api/.env` into the container, so the file must
+exist before you start it. Without `ADMIN_PASSWORD` and `SESSION_SECRET` the app
+exits immediately on startup (check with `docker compose logs printlib`).
+
 Either way, the app is now on `http://localhost:8000`, serving both the API
 and the built frontend from one container. Uploaded files and the SQLite
 database live in `./data` (bind-mounted), so they survive rebuilds/updates.

@@ -5,6 +5,9 @@ services:
   printlib:
     build: .
     image: printlib:local
+    # Required: ADMIN_PASSWORD and SESSION_SECRET (plus optional Bluesky settings).
+    # Copy apps/api/.env.example to apps/api/.env and edit it first.
+    env_file: apps/api/.env
     volumes:
       - ./data:/data
     ports:
