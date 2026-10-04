@@ -121,6 +121,13 @@ export default function ModelDetail() {
               onPreviewSaved={refresh}
               editable={authenticated}
             />
+          ) : model.previewFilename ? (
+            <img
+              src={api.previewUrl(model.previewFilename)}
+              alt={model.name}
+              onClick={() => setLightboxSrc(api.previewUrl(model.previewFilename!))}
+              className="max-h-[32rem] w-full cursor-zoom-in rounded-lg border border-slate-800 bg-slate-900 object-contain"
+            />
           ) : (
             <div className="flex h-80 items-center justify-center rounded-lg border border-slate-800 bg-slate-900 text-slate-500">
               No STL preview available
@@ -277,11 +284,11 @@ export default function ModelDetail() {
         </div>
       </div>
 
-      {authenticated && (
+      {(authenticated || model.printLogs.length > 0) && (
         <div className="grid grid-cols-1 gap-3">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold">Print history</h2>
-            <PrintLogForm modelId={model.id} onAdded={refresh} />
+            {authenticated && <PrintLogForm modelId={model.id} onAdded={refresh} />}
           </div>
 
           {model.printLogs.length === 0 ? (
@@ -311,12 +318,14 @@ export default function ModelDetail() {
                           onClick={() => setLightboxSrc(api.printLogPhotoUrl(log.photoFilename!))}
                           className="h-24 w-24 cursor-zoom-in rounded object-cover"
                         />
-                        <button
-                          onClick={() => api.setPreviewFromLog(model.id, log.id).then(refresh)}
-                          className="text-xs text-sky-400 hover:text-sky-300"
-                        >
-                          Use as preview
-                        </button>
+                        {authenticated && (
+                          <button
+                            onClick={() => api.setPreviewFromLog(model.id, log.id).then(refresh)}
+                            className="text-xs text-sky-400 hover:text-sky-300"
+                          >
+                            Use as preview
+                          </button>
+                        )}
                       </div>
                     )}
                     <div className="flex-1">
@@ -331,17 +340,21 @@ export default function ModelDetail() {
                       {log.notes && <p className="mt-1 text-sm text-slate-300">{log.notes}</p>}
                     </div>
                     <div className="flex shrink-0 flex-col items-end justify-between gap-2 text-sm">
-                      <div className="flex h-6 items-center">
-                        <ShareButtons logId={log.id} hasPhoto={!!log.photoFilename} integrations={integrations} />
-                      </div>
-                      <div className="flex gap-3">
-                        <button onClick={() => setEditingLogId(log.id)} className="text-sky-400 hover:text-sky-300">
-                          Edit
-                        </button>
-                        <button onClick={() => deletePrintLog(log.id)} className="text-red-400 hover:text-red-300">
-                          Delete
-                        </button>
-                      </div>
+                      {authenticated && (
+                        <div className="flex h-6 items-center">
+                          <ShareButtons logId={log.id} hasPhoto={!!log.photoFilename} integrations={integrations} />
+                        </div>
+                      )}
+                      {authenticated && (
+                        <div className="flex gap-3">
+                          <button onClick={() => setEditingLogId(log.id)} className="text-sky-400 hover:text-sky-300">
+                            Edit
+                          </button>
+                          <button onClick={() => deletePrintLog(log.id)} className="text-red-400 hover:text-red-300">
+                            Delete
+                          </button>
+                        </div>
+                      )}
                     </div>
                   </li>
                 ),

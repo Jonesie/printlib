@@ -8,7 +8,6 @@ import SiteLinksPanel from "../components/SiteLinksPanel";
 import PrintersPanel from "../components/PrintersPanel";
 import ProfilePanel from "../components/ProfilePanel";
 import StarRating from "../components/StarRating";
-import Lightbox from "../components/Lightbox";
 import SourcePill from "../components/SourcePill";
 import { useAuth } from "../auth/AuthContext";
 
@@ -36,7 +35,6 @@ export default function Library() {
   const [sortBy, setSortBy] = useState<SortBy>(readStoredSort);
   const [minRating, setMinRating] = useState<string>("");
   const [loading, setLoading] = useState(true);
-  const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
 
   useEffect(() => {
     try {
@@ -167,11 +165,7 @@ export default function Library() {
                     <img
                       src={api.previewUrl(model.previewFilename)}
                       alt={model.name}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        setLightboxSrc(api.previewUrl(model.previewFilename!));
-                      }}
-                      className="aspect-square w-full cursor-zoom-in rounded bg-slate-800 object-contain"
+                      className="aspect-square w-full rounded bg-slate-800 object-contain"
                     />
                   ) : (
                     <div className="flex aspect-square w-full items-center justify-center rounded bg-slate-800 text-3xl">
@@ -197,7 +191,7 @@ export default function Library() {
                     ))}
                   </div>
                 )}
-                {authenticated && model.printCount > 0 && (
+                {model.printCount > 0 && (
                   <p className="mt-2 text-xs text-emerald-400">
                     Printed {model.printCount}× · last {new Date(model.lastPrintedAt!).toLocaleDateString()}
                   </p>
@@ -207,8 +201,6 @@ export default function Library() {
           </div>
         )}
       </div>
-
-      <Lightbox src={lightboxSrc} onClose={() => setLightboxSrc(null)} />
     </div>
   );
 }
