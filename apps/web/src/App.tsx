@@ -7,6 +7,7 @@ import { api } from "./api/client";
 import { AuthProvider, useAuth } from "./auth/AuthContext";
 import { ThemeProvider, THEMES, useTheme } from "./theme/ThemeContext";
 import Dropdown from "./components/Dropdown";
+import { useConfig } from "./api/useConfig";
 
 function Header() {
   const { authenticated, refresh } = useAuth();
@@ -33,6 +34,7 @@ function Header() {
 
 function Footer() {
   const [releaseUrl, setReleaseUrl] = useState<string | null>(null);
+  const coffeeUrl = useConfig()?.buyMeACoffeeUrl;
 
   useEffect(() => {
     api
@@ -51,14 +53,11 @@ function Footer() {
       >
         GitHub
       </a>
-      <a
-        href="https://www.buymeacoffee.com/jonesie"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="hover:text-slate-300"
-      >
-        Buy me a coffee ☕
-      </a>
+      {coffeeUrl && (
+        <a href={coffeeUrl} target="_blank" rel="noopener noreferrer" className="hover:text-slate-300">
+          Buy me a coffee ☕
+        </a>
+      )}
       <span>
         v{__APP_VERSION__}
         {releaseUrl && (

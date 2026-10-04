@@ -1,16 +1,8 @@
-import { useEffect, useState } from "react";
-import { api } from "../api/client";
+import { useConfig } from "../api/useConfig";
 
 export default function GetPrintLibPanel() {
-  // Hidden until the server confirms it's enabled, so it never flashes when turned off.
-  const [show, setShow] = useState(false);
-  useEffect(() => {
-    api
-      .getConfig()
-      .then((c) => setShow(c.showGetPrintLibPanel))
-      .catch(() => {});
-  }, []);
-  if (!show) return null;
+  const config = useConfig();
+  if (!config?.showGetPrintLibPanel) return null;
 
   return (
     <div className="rounded-lg border border-slate-800 bg-slate-900 p-4">

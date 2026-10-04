@@ -9,6 +9,11 @@ import type {
   VersionStatus,
 } from "@printlib/shared";
 
+export interface AppConfig {
+  showGetPrintLibPanel: boolean;
+  buyMeACoffeeUrl: string | null;
+}
+
 export type ShareSite = "bluesky" | "facebook" | "instagram";
 
 async function json<T>(res: Response): Promise<T> {
@@ -29,7 +34,7 @@ export const api = {
   },
 
   getConfig() {
-    return fetch(`/api/config`).then((r) => json<{ showGetPrintLibPanel: boolean }>(r));
+    return fetch(`/api/config`).then((r) => json<AppConfig>(r));
   },
 
   getIntegrations() {
