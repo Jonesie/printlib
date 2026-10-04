@@ -19,8 +19,16 @@ export default async function shareRoutes(app: FastifyInstance) {
     const { maxChars } = SITE_CONFIG[site];
     const url = modelUrl(model.id);
     const text = defaultPostText({ ...log, modelName: model.name });
-    const withLink = url ? `${text}\n\n${url}` : text;
-    return { text: graphemeLength(withLink) <= maxChars ? withLink : text.slice(0, maxChars) };
+    const source = model.sourceUrl ? `Source: ${model.sourceUrl}` : null;
+    // Prefer the full post; drop the library link, then the source, before truncating the text.
+    const candidates = [
+      [text, url, source],
+      [text, source],
+      [text, url],
+      [text],
+    ].map((parts) => parts.filter(Boolean).join("\n\n"));
+    const fit = candidates.find((c) => graphemeLength(c) <= maxChars);
+    return { text: fit ?? text.slice(0, maxChars) };
   });
 
   // Body: { text } — the (possibly user-edited) post text.
