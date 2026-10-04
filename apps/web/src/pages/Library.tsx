@@ -5,6 +5,7 @@ import { api } from "../api/client";
 import UploadDropzone from "../components/UploadDropzone";
 import CategoryManager from "../components/CategoryManager";
 import SiteLinksPanel from "../components/SiteLinksPanel";
+import CoffeeButton from "../components/CoffeeButton";
 import GetPrintLibPanel from "../components/GetPrintLibPanel";
 import PrintersPanel from "../components/PrintersPanel";
 import ProfilePanel from "../components/ProfilePanel";
@@ -85,6 +86,7 @@ export default function Library() {
         <ProfilePanel />
         <SiteLinksPanel />
         <GetPrintLibPanel />
+        <CoffeeButton />
       </div>
 
       <PrintersPanel />
