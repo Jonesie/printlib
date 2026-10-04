@@ -66,6 +66,8 @@ function ShareButton({
   const info = SITES[site];
   const [open, setOpen] = useState(false);
   const [text, setText] = useState("");
+  const [source, setSource] = useState<string | null>(null);
+  const [includeSource, setIncludeSource] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [postUrl, setPostUrl] = useState<string | null>(null);
@@ -82,8 +84,12 @@ function ShareButton({
     setError(null);
     setPostUrl(null);
     setText("");
+    setSource(null);
+    setIncludeSource(true);
     try {
-      setText((await api.getShareDraft(logId, site)).text);
+      const draft = await api.getShareDraft(logId, site);
+      setText(draft.text);
+      setSource(draft.source);
     } catch (e) {
       setError((e as Error).message);
     }
@@ -93,7 +99,7 @@ function ShareButton({
     setBusy(true);
     setError(null);
     try {
-      const res = await api.shareTo(site, logId, text);
+      const res = await api.shareTo(site, logId, text, includeSource && source !== null);
       setPostUrl(res.url);
       setImageSkipped(res.imageSkipped);
     } catch (e) {
@@ -103,7 +109,9 @@ function ShareButton({
     }
   }
 
-  const count = [...new Intl.Segmenter(undefined, { granularity: "grapheme" }).segment(text)].length;
+  const graphemes = (s: string) => [...new Intl.Segmenter(undefined, { granularity: "grapheme" }).segment(s)].length;
+  const sourceCount = includeSource && source ? graphemes(`\n\n${source}`) : 0;
+  const count = graphemes(text) + sourceCount;
 
   return (
     <>
@@ -139,6 +147,21 @@ function ShareButton({
                 rows={6}
                 className="w-full rounded border border-slate-700 bg-slate-950 p-2"
               />
+              {source && (
+                <div className="grid grid-cols-1 gap-1 rounded border border-slate-800 bg-slate-900/50 p-2 text-sm">
+                  <label className="flex items-center gap-2 text-slate-300">
+                    <input
+                      type="checkbox"
+                      checked={includeSource}
+                      onChange={(e) => setIncludeSource(e.target.checked)}
+                    />
+                    Add source link to the end of the post
+                  </label>
+                  <p className={`break-all ${includeSource ? "text-slate-300" : "text-slate-600 line-through"}`}>
+                    {source}
+                  </p>
+                </div>
+              )}
               <p className={`text-right text-xs ${count > info.maxChars ? "text-red-400" : "text-slate-400"}`}>
                 {count}/{info.maxChars}
               </p>
