@@ -28,6 +28,10 @@ export const api = {
     return fetch(`/api/version`).then((r) => json<VersionStatus>(r));
   },
 
+  getConfig() {
+    return fetch(`/api/config`).then((r) => json<{ showGetPrintLibPanel: boolean }>(r));
+  },
+
   getIntegrations() {
     return fetch(`/api/integrations`).then((r) => json<Record<ShareSite, boolean>>(r));
   },

@@ -16,6 +16,7 @@ import filesRoutes from "./routes/files.js";
 import siteLinksRoutes from "./routes/siteLinks.js";
 import printersRoutes from "./routes/printers.js";
 import profileRoutes from "./routes/profile.js";
+import configRoutes from "./routes/config.js";
 import versionRoutes from "./routes/version.js";
 import shareRoutes from "./routes/share.js";
 
@@ -55,6 +56,7 @@ export function buildApp() {
   app.register(printersRoutes);
   app.register(profileRoutes);
   app.register(versionRoutes);
+  app.register(configRoutes);
   app.register(shareRoutes);
 
   if (WEB_DIST_DIR) {

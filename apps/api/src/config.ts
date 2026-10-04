@@ -17,6 +17,12 @@ export const APP_VERSION = process.env.APP_VERSION ?? "dev";
 // Set when the frontend build should be served by this process (production).
 export const WEB_DIST_DIR = process.env.WEB_DIST_DIR ?? null;
 
+// The "Want your own PrintLib?" panel on the home page; on unless set to
+// "false" (or "0"/"no"/"off").
+export const SHOW_GET_PRINTLIB_PANEL = !["false", "0", "no", "off"].includes(
+  (process.env.SHOW_GET_PRINTLIB_PANEL ?? "").trim().toLowerCase(),
+);
+
 // Optional Bluesky sharing: an app password (Settings → Privacy and security →
 // App passwords in Bluesky), never the account password. Sharing is disabled
 // unless both handle and app password are set.

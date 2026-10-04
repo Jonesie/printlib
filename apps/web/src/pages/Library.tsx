@@ -5,6 +5,7 @@ import { api } from "../api/client";
 import UploadDropzone from "../components/UploadDropzone";
 import CategoryManager from "../components/CategoryManager";
 import SiteLinksPanel from "../components/SiteLinksPanel";
+import GetPrintLibPanel from "../components/GetPrintLibPanel";
 import PrintersPanel from "../components/PrintersPanel";
 import ProfilePanel from "../components/ProfilePanel";
 import StarRating from "../components/StarRating";
@@ -80,6 +81,7 @@ export default function Library() {
       <div className="order-1 grid min-w-0 gap-6 lg:sticky lg:top-6">
         <ProfilePanel />
         <SiteLinksPanel />
+        <GetPrintLibPanel />
       </div>
 
       <PrintersPanel />
