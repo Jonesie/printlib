@@ -67,13 +67,16 @@ export default function Library() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search, categoryId, printerName]);
 
+  // Sort by when a model was last printed, falling back to when it was added if it has no print logs.
+  const sortDate = (m: ModelSummary) => m.lastPrintedAt ?? m.createdAt;
+
   const visibleModels = models
     .filter((m) => !minRating || (m.rating ?? 0) >= Number(minRating))
     .slice()
     .sort((a, b) => {
       if (sortBy === "name") return a.name.localeCompare(b.name);
-      if (sortBy === "date-asc") return a.createdAt.localeCompare(b.createdAt);
-      return b.createdAt.localeCompare(a.createdAt);
+      if (sortBy === "date-asc") return sortDate(a).localeCompare(sortDate(b));
+      return sortDate(b).localeCompare(sortDate(a));
     });
 
   return (
