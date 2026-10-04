@@ -15,7 +15,6 @@ import {
 } from "../db/queries.js";
 import { storeUpload } from "../lib/upload.js";
 import { MODELS_DIR, PREVIEWS_DIR, PRINT_LOGS_DIR } from "../config.js";
-import { isValidSessionToken, SESSION_COOKIE } from "../lib/auth.js";
 
 async function readMultipartBuffer(part: AsyncIterable<Buffer>): Promise<Buffer> {
   const chunks: Buffer[] = [];
@@ -38,12 +37,6 @@ export default async function modelsRoutes(app: FastifyInstance) {
     const id = Number((request.params as { id: string }).id);
     const model = getModelDetail(id);
     if (!model) return reply.code(404).send({ error: "Model not found" });
-
-    // Print logs (notes, photos) are only for the logged-in owner — strip
-    // them at the API layer, not just in the UI, for anonymous requests.
-    if (!isValidSessionToken(request.cookies[SESSION_COOKIE])) {
-      return { ...model, printLogs: [] };
-    }
     return model;
   });
 
