@@ -23,6 +23,10 @@ export const SHOW_GET_PRINTLIB_PANEL = !["false", "0", "no", "off"].includes(
   (process.env.SHOW_GET_PRINTLIB_PANEL ?? "").trim().toLowerCase(),
 );
 
+// Buy Me a Coffee username (the part after buymeacoffee.com/). The home-page
+// button and footer link are hidden when this is unset or empty.
+export const BUYMEACOFFEE_USERNAME = process.env.BUYMEACOFFEE_USERNAME?.trim().replace(/^@/, "") || null;
+
 // Optional Bluesky sharing: an app password (Settings → Privacy and security →
 // App passwords in Bluesky), never the account password. Sharing is disabled
 // unless both handle and app password are set.
