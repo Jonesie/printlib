@@ -33,14 +33,16 @@ export const api = {
   },
 
   getShareDraft(printLogId: number, site: ShareSite) {
-    return fetch(`/api/print-logs/${printLogId}/share-draft?site=${site}`).then((r) => json<{ text: string }>(r));
+    return fetch(`/api/print-logs/${printLogId}/share-draft?site=${site}`).then((r) =>
+      json<{ text: string; source: string | null; maxChars: number }>(r),
+    );
   },
 
-  shareTo(site: ShareSite, printLogId: number, text: string) {
+  shareTo(site: ShareSite, printLogId: number, text: string, includeSource: boolean) {
     return fetch(`/api/print-logs/${printLogId}/share/${site}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text }),
+      body: JSON.stringify({ text, includeSource }),
     }).then((r) => json<{ url: string; imageSkipped: boolean }>(r));
   },
 
