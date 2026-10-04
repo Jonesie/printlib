@@ -121,6 +121,13 @@ export default function ModelDetail() {
               onPreviewSaved={refresh}
               editable={authenticated}
             />
+          ) : model.previewFilename ? (
+            <img
+              src={api.previewUrl(model.previewFilename)}
+              alt={model.name}
+              onClick={() => setLightboxSrc(api.previewUrl(model.previewFilename!))}
+              className="max-h-[32rem] w-full cursor-zoom-in rounded-lg border border-slate-800 bg-slate-900 object-contain"
+            />
           ) : (
             <div className="flex h-80 items-center justify-center rounded-lg border border-slate-800 bg-slate-900 text-slate-500">
               No STL preview available
