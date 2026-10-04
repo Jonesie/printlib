@@ -129,6 +129,7 @@ Set in `apps/api/.env` (see `apps/api/.env.example`):
 | `FACEBOOK_PAGE_ID`, `FACEBOOK_PAGE_ACCESS_TOKEN` | no | Facebook Page ID and a Page access token, to share print logs to the Page; off unless both are set |
 | `INSTAGRAM_ACCOUNT_ID`, `INSTAGRAM_ACCESS_TOKEN` | no | Instagram Business/Creator account ID and access token; also needs an internet-reachable `PUBLIC_URL` (Instagram fetches the photo) and a print log with a photo |
 | `PUBLIC_URL`      | no       | Public URL of the site; shared posts link back to the model page |
+| `SHOW_GET_PRINTLIB_PANEL` | no | Set to `false` to hide the "Want your own PrintLib?" panel on the home page (shown by default) |
 
 ### Sharing to social sites
 

@@ -15,6 +15,12 @@ describe("public reads", () => {
     expect(res.statusCode).toBe(200);
   });
 
+  it("GET /api/config shows the get-PrintLib panel by default", async () => {
+    const res = await app.inject({ method: "GET", url: "/api/config" });
+    expect(res.statusCode).toBe(200);
+    expect(res.json()).toEqual({ showGetPrintLibPanel: true });
+  });
+
   it("GET /api/session reports unauthenticated with no cookie", async () => {
     const res = await app.inject({ method: "GET", url: "/api/session" });
     expect(res.statusCode).toBe(200);
